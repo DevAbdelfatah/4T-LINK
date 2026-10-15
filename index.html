@@ -1,967 +1,418 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#080d18">
-<title>4T-LINK | Local Domain Security Analyzer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>4T-LINK | محلل أمان الروابط المجاني – افحص الروابط المشبوهة والتصيد</title>
+<meta name="description" content="أداة 4T-LINK المجانية لتحليل الروابط واكتشاف مؤشرات التصيد وانتحال العلامات التجارية والنطاقات المضللة. تعمل داخل متصفحك دون إرسال روابطك لأي خادم.">
+<meta name="keywords" content="فحص الروابط, تحليل رابط, كشف التصيد, روابط مشبوهة, أمان الروابط, phishing checker, URL scanner">
+<meta name="author" content="عبدالفتاح عبدالحميد (ديبو)">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a0e17">
+<link rel="canonical" href="https://YOUR-DOMAIN.com/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:site_name" content="4T-LINK">
+<meta property="og:title" content="4T-LINK | محلل أمان الروابط المجاني">
+<meta property="og:description" content="افهم مخاطر الرابط قبل فتحه. تحليل محلي وخصوصية كاملة.">
+<meta property="og:url" content="https://YOUR-DOMAIN.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="4T-LINK | محلل أمان الروابط">
+<meta name="twitter:description" content="تحليل مؤشرات خطورة الروابط داخل متصفحك.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2370f0c0'/%3E%3Cpath d='M32 12l16 6v12c0 11-7 18-16 22-9-4-16-11-16-22V18z' fill='%2307131b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebApplication","name":"4T-LINK","applicationCategory":"SecurityApplication","operatingSystem":"Any","inLanguage":"ar","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"أداة مجانية لتحليل مؤشرات خطورة الروابط داخل المتصفح.","author":{"@type":"Person","name":"عبدالفتاح عبدالحميد (ديبو)"}},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"هل يتم إرسال الرابط إلى خادم؟","acceptedAnswer":{"@type":"Answer","text":"لا. يتم التحليل بالكامل داخل متصفحك ولا يتصل الكود بأي خادم."}},
+{"@type":"Question","name":"هل النتيجة تؤكد أمان الرابط؟","acceptedAnswer":{"@type":"Answer","text":"لا. النتيجة مؤشر إرشادي مبني على قواعد بنيوية، وقد تكون إيجابية أو سلبية كاذبة."}},
+{"@type":"Question","name":"هل الأداة مجانية؟","acceptedAnswer":{"@type":"Answer","text":"نعم، مجانية بالكامل وبدون تسجيل."}}]}]}
+</script>
 <style>
-:root{
-  --bg:#080d18;--panel:#101a2b;--line:#27364c;
-  --text:#edf4ff;--muted:#91a2bb;--cyan:#32d5ee;
-  --green:#3cdda0;--yellow:#ffc857;--red:#ff667d;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;background:
-  radial-gradient(ellipse at 10% 0%,#123047 0,transparent 35%),
-  radial-gradient(ellipse at 100% 50%,#211b45 0,transparent 35%),var(--bg);
-  color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.8;
-}
-button,input{font:inherit}
-button{cursor:pointer}
-a{color:var(--cyan);overflow-wrap:anywhere}
-.container{width:min(1080px,calc(100% - 30px));margin:auto}
-header{position:sticky;top:0;z-index:5;background:#080d18eF;border-bottom:1px solid var(--line);backdrop-filter:blur(15px)}
-.nav{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 0}
-.logo{font-size:25px;font-weight:900;letter-spacing:1px}
-.gradient{background:linear-gradient(100deg,#32d5ee,#8b92ff,#d29bff);background-clip:text;color:transparent}
-.pill{border:1px solid #31516a;border-radius:99px;padding:5px 11px;font-size:12px;color:#9cefff}
-.hero{text-align:center;padding:48px 0 30px}
-.hero h1{font-size:clamp(30px,6vw,53px);line-height:1.35;margin:12px 0}
-.hero p{max-width:720px;margin:12px auto;color:var(--muted)}
-.panel{background:#101a2bdc;border:1px solid var(--line);border-radius:22px;padding:23px;margin:18px 0;box-shadow:0 20px 70px #0002}
-.label{display:block;font-weight:bold;margin-bottom:8px}
-.inputrow{display:flex;gap:10px}
-input{min-width:0;width:100%;padding:14px;border-radius:13px;background:#080f1d;border:1px solid #34445e;color:white;outline:none}
-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #32d5ee19}
-.btn{border:0;border-radius:13px;padding:12px 20px;font-weight:bold;background:linear-gradient(120deg,#0891b2,#5148d9);color:white}
-.btn:hover{filter:brightness(1.12)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn.secondary{background:#1b2940;border:1px solid #34445e}
-.small{font-size:12px;color:var(--muted)}
-.notice{padding:13px 15px;border-radius:13px;background:#ffc8570c;border:1px solid #ffc85733;color:#f6dba0;font-size:13px}
+:root{--bg:#0a0e17;--panel:#111826;--panel2:#0c111c;--line:rgba(255,255,255,.09);--text:#eef2ff;--muted:#9aa8c2;--accent:#70f0c0;--accent2:#6cc8ff;--red:#ff707d;--amber:#f5c46c;--shadow:0 20px 60px rgba(0,0,0,.25);color-scheme:dark}
+:root[data-theme=light]{--bg:#f3f6fb;--panel:#fff;--panel2:#f3f6fb;--line:rgba(10,20,40,.12);--text:#101828;--muted:#566178;--accent:#0a9b6e;--accent2:#1b74d8;--red:#d6303f;--amber:#b7791f;--shadow:0 20px 50px rgba(20,40,80,.1);color-scheme:light}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{font-family:'Cairo',system-ui,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);line-height:1.9;min-height:100vh;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 20px}
+.narrow{max-width:860px;margin:0 auto}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:900;font-size:1.3rem}
+.logo i{width:42px;height:42px;border-radius:14px;background:linear-gradient(140deg,#8affd2,#4ea8ff);display:grid;place-items:center;font-style:normal;color:#07131b}
+.logo b{color:var(--accent)}
+nav{display:flex;align-items:center;gap:22px;font-size:.92rem;color:var(--muted)}
+nav a:hover{color:var(--text)}
+.icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.hero{text-align:center;padding:72px 0 40px}
+.pill{display:inline-block;padding:6px 16px;border:1px solid var(--line);border-radius:99px;font-size:.82rem;color:var(--accent);margin-bottom:24px}
+h1{font-size:clamp(1.9rem,5.5vw,3.6rem);font-weight:900;line-height:1.5;letter-spacing:-.01em}
+h1 span{background:linear-gradient(270deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);max-width:640px;margin:22px auto 0;font-size:1.02rem;line-height:2.1}
+.stats{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 36px;margin-top:30px;color:var(--muted);font-size:.9rem}
+.stats strong{color:var(--text);font-size:1.15rem;margin-left:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:clamp(18px,4vw,34px);box-shadow:var(--shadow)}
+.tabs{display:inline-flex;gap:4px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;margin-bottom:22px}
+.tab{border:0;background:none;padding:8px 20px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:600}
+.tab[aria-selected=true]{background:var(--accent);color:#07131b}
+label.t{display:block;font-weight:600;margin-bottom:10px}
+.field{display:flex;gap:10px;flex-wrap:wrap;padding:8px;border:1px solid var(--line);border-radius:18px;background:var(--panel2);transition:.2s}
+.field:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 12%,transparent)}
+.field input,.field textarea{flex:1;min-width:0;background:none;border:0;outline:0;padding:12px;direction:ltr;text-align:left}
+.field textarea{min-height:130px;resize:vertical;width:100%}
+.btn{border:0;cursor:pointer;border-radius:13px;padding:12px 26px;font-weight:800;background:linear-gradient(110deg,#87ffd2,#6cc8ff);color:#07131b;transition:.2s}
+.btn:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.55;cursor:wait}
+.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line);font-weight:600}
+.ghost:hover{border-color:var(--accent);filter:none}
+.hint{font-size:.84rem;color:var(--muted);margin-top:14px}
+.err{color:var(--red);font-size:.92rem;margin-top:12px}
+.samples{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center}
+.samples small{color:var(--muted)}
+.chip{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:5px 14px;font-size:.84rem;cursor:pointer;color:var(--muted)}
+.chip:hover{color:var(--accent);border-color:var(--accent)}
 .hidden{display:none!important}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.stat{background:#080f1d;border:1px solid var(--line);padding:15px;border-radius:15px;min-width:0}
-.stat .value{font-size:28px;font-weight:900;overflow-wrap:anywhere}
-.stat .name{font-size:12px;color:var(--muted)}
-.section-title{font-size:20px;margin:0 0 14px}
-.meter{height:9px;border-radius:99px;background:#26354a;overflow:hidden;margin:13px 0}
-.meter-fill{height:100%;width:0;background:var(--green);transition:width .4s}
-.result-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
-.badge{display:inline-block;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:bold}
-.badge.green{background:#3cdda01a;color:var(--green)}
-.badge.yellow{background:#ffc8571a;color:var(--yellow)}
-.badge.red{background:#ff667d1a;color:var(--red)}
-.badge.gray{background:#91a2bb1a;color:#c3d0e2}
-.item{padding:13px;margin:9px 0;border:1px solid var(--line);background:#0b1322;border-radius:13px;display:flex;gap:12px;align-items:flex-start}
-.item .symbol{font-weight:900;font-size:18px;min-width:22px}
-.item strong{display:block;font-size:14px}
-.item p{margin:3px 0 0;color:var(--muted);font-size:13px;overflow-wrap:anywhere}
-.good{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}.info{color:var(--cyan)}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:left;color:#b9d4ef;background:#080f1d;padding:15px;border-radius:12px;font-size:12px}
-footer{text-align:center;border-top:1px solid var(--line);padding:28px 10px;color:var(--muted);font-size:12px;margin-top:45px}
-#splash{position:fixed;inset:0;z-index:100;background:#070b13;display:grid;place-items:center;transition:opacity .5s,visibility .5s}
-#splash.done{opacity:0;visibility:hidden;pointer-events:none}
-.splash-content{text-align:center;padding:20px}
-.mark{width:85px;height:85px;border-radius:25px;display:grid;place-items:center;margin:auto auto 20px;background:linear-gradient(135deg,#0891b2,#5148d9);font-size:35px;font-weight:900;box-shadow:0 0 65px #32d5ee24}
-.progress{height:4px;width:180px;background:#1e293b;margin:22px auto;border-radius:9px;overflow:hidden}
-.progress div{height:100%;background:var(--cyan);animation:load 4s linear forwards}
-@keyframes load{from{width:0}to{width:100%}}
-#toast{position:fixed;z-index:110;bottom:20px;left:20px;max-width:calc(100% - 40px);background:#18253a;border:1px solid #3a4c68;padding:13px 18px;border-radius:13px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}
-#toast.show{opacity:1;transform:translateY(0)}
-code{color:#91e9f5;overflow-wrap:anywhere}
-@media(max-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.inputrow{flex-direction:column}.panel{padding:16px}.hero{padding-top:35px}.result-head{flex-direction:column}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.res{margin-top:24px}
+.head{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.ring{--s:0deg;--c:var(--accent);width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--c) var(--s),var(--line) var(--s));display:grid;place-items:center;flex-shrink:0}
+.ring div{width:74px;height:74px;border-radius:50%;background:var(--panel);display:grid;place-items:center;text-align:center;line-height:1.2;font-size:.7rem;color:var(--muted)}
+.ring b{display:block;font-size:1.5rem;color:var(--text)}
+.head h2{font-size:1.4rem}
+.head p{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+h3{font-size:1rem;margin-bottom:14px}
+.find{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.find:last-child{border:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:11px;flex-shrink:0}
+.danger .dot{background:var(--red)}.warning .dot{background:var(--amber)}.info .dot{background:var(--accent2)}
+.find b{display:block}
+.find span{color:var(--muted);font-size:.88rem;line-height:1.9}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.88rem}
+dt{color:var(--muted)}
+dd{direction:ltr;text-align:left;word-break:break-all;font-family:ui-monospace,Consolas,monospace;font-size:.82rem;align-self:center}
+.note{margin-top:24px;padding:16px 18px;border-radius:14px;background:color-mix(in srgb,var(--amber) 10%,transparent);border:1px solid color-mix(in srgb,var(--amber) 25%,transparent);color:var(--muted);font-size:.86rem}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:12px 10px;text-align:right;border-bottom:1px solid var(--line)}
+td.u{direction:ltr;text-align:left;word-break:break-all;font-family:ui-monospace,Consolas,monospace;font-size:.8rem}
+.badge{display:inline-block;padding:2px 12px;border-radius:99px;font-size:.78rem;font-weight:700}
+.b-high{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+.b-mid{background:color-mix(in srgb,var(--amber) 18%,transparent);color:var(--amber)}
+.b-low{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+section.s{padding:64px 0 0}
+.title{text-align:center;margin-bottom:34px}
+.title h2{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:900}
+.title p{color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.feat{padding:26px;border:1px solid var(--line);border-radius:20px;background:var(--panel)}
+.feat em{font-style:normal;font-size:1.6rem;display:block;margin-bottom:10px}
+.feat p{color:var(--muted);font-size:.9rem;line-height:2}
+details{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:4px 20px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:700;padding:14px 0}
+details p{color:var(--muted);padding-bottom:16px;font-size:.92rem}
+.hist li{list-style:none;display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.hist li span:first-child{direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.84rem;font-family:ui-monospace,Consolas,monospace;color:var(--muted)}
+.hist{padding:0}
+footer{margin-top:80px;border-top:1px solid var(--line);padding:36px 0;color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
+footer strong{color:var(--text)}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);padding:12px 22px;border-radius:12px;box-shadow:var(--shadow);z-index:50;font-size:.9rem}
+.sp{width:16px;height:16px;border:2px solid #07131b55;border-top-color:#07131b;border-radius:50%;display:inline-block;vertical-align:middle;margin-left:8px;animation:r .7s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+@media(max-width:760px){nav a{display:none}.grid2{grid-template-columns:1fr}.hero{padding-top:48px}.btn{width:100%}th:nth-child(3),td:nth-child(3){display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media print{header,footer,.samples,form,.actions,section.s{display:none}body{background:#fff;color:#000}}
 </style>
 </head>
 <body>
+<header><div class="wrap bar">
+  <a href="#" class="logo" aria-label="4T-LINK"><i>🛡</i><span>4T-LINK<b>.</b></span></a>
+  <nav aria-label="التنقل"><a href="#scan">الفحص</a><a href="#history">السجل</a><a href="#features">المميزات</a><a href="#faq">الأسئلة</a>
+  <button class="icon-btn" id="themeBtn" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل الوضع">🌓</button></nav>
+</div></header>
 
-<div id="splash">
-  <div class="splash-content">
-    <div class="mark">4T</div>
-    <div class="logo gradient">4T-LINK</div>
-    <p style="color:#91a2bb">محلل أمان الروابط والدومينات</p>
-    <p class="small">LOCAL ANALYSIS ENGINE · OFFLINE</p>
-    <div class="progress"><div></div></div>
-  </div>
-</div>
+<main class="wrap">
+<section class="hero">
+  <span class="pill">أداة مجانية · تحليل محلي · بدون تسجيل</span>
+  <h1>قبل ما تفتح الرابط،<br><span>افهم مخاطره.</span></h1>
+  <p class="lead">حلّل أي رابط واكتشف مؤشرات التصيد وانتحال العلامات التجارية والنطاقات المضللة خلال ثوانٍ، ورابطك لا يغادر متصفحك أبدًا.</p>
+  <div class="stats"><span><strong>25+</strong>قاعدة فحص</span><span><strong>20</strong>رابطًا في الفحص الجماعي</span><span><strong>0</strong>بيانات مرسلة</span></div>
+</section>
 
-<header>
-  <div class="container nav">
-    <div>
-      <div class="logo gradient">4T-LINK</div>
-      <div class="small">LOCAL DOMAIN SECURITY ANALYZER</div>
+<section id="scan" class="narrow" aria-label="فحص الروابط">
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabOne" aria-selected="true">رابط واحد</button>
+      <button class="tab" role="tab" id="tabBulk" aria-selected="false">فحص جماعي</button>
     </div>
-    <span class="pill">فحص محلي مستقل</span>
-  </div>
-</header>
-
-<main class="container">
-  <section class="hero">
-    <span class="pill">لا API · لا مفاتيح · لا رفع للروابط</span>
-    <h1>حلّل الرابط قبل ما <span class="gradient">تثق فيه</span></h1>
-    <p>تحليل محلي لتركيب الرابط والدومين ومؤشرات التصيد والخداع والمنافذ ومعلمات التحويل والملفات المحتملة الخطورة.</p>
-  </section>
-
-  <section class="panel">
-    <form id="scanForm">
-      <label class="label" for="urlInput">أدخل رابطًا أو اسم دومين</label>
-      <div class="inputrow">
-        <input id="urlInput" type="text" dir="ltr" maxlength="4096"
-          placeholder="example.com أو https://example.com/login"
-          autocomplete="off" spellcheck="false" required>
-        <button id="scanBtn" class="btn" type="submit">ابدأ التحليل</button>
-      </div>
-      <p class="small">أمثلة: example.com · https://example.com/account · http://192.0.2.1</p>
-    </form>
-    <div class="notice" style="margin-top:16px">
-      هذه الأداة لا تتصل بالدومين ولا تجلب محتواه ولا تستعلم عن DNS. جميع النتائج استنتاجات من النص الذي تدخله، وليست شهادة أمان.
-    </div>
-  </section>
-
-  <section id="results" class="hidden">
-    <div class="panel">
-      <div class="result-head">
-        <div>
-          <div class="small">LOCAL HEURISTIC ANALYSIS</div>
-          <h2 id="verdictTitle" class="section-title" style="font-size:25px;margin-top:8px">نتيجة التحليل</h2>
-          <p id="verdictText" class="small"></p>
+    <form id="form" novalidate>
+      <div id="paneOne">
+        <label class="t" for="url">عنوان الرابط</label>
+        <div class="field">
+          <input id="url" type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="2048" placeholder="https://example.com">
+          <button type="button" class="btn ghost" id="pasteBtn">لصق</button>
         </div>
-        <span id="verdictBadge" class="badge gray">لم يُحلل</span>
       </div>
-      <div class="meter"><div id="meterFill" class="meter-fill"></div></div>
-      <div class="small">درجة الاشتباه الاستدلالية: <strong id="scoreText">0/100</strong> — ليست احتمالًا إحصائيًا لكون الرابط ضارًا.</div>
-    </div>
-
-    <div class="grid">
-      <div class="stat"><div class="name">طول الرابط</div><div id="urlLength" class="value">—</div><div class="name">حرف</div></div>
-      <div class="stat"><div class="name">مستويات النطاق</div><div id="subdomainCount" class="value">—</div><div class="name">جزء مفصول بنقطة</div></div>
-      <div class="stat"><div class="name">معلمات URL</div><div id="paramCount" class="value">—</div><div class="name">Query parameters</div></div>
-      <div class="stat"><div class="name">مؤشرات مكتشفة</div><div id="findingCount" class="value">—</div><div class="name">قواعد محلية</div></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">1. بيانات الرابط المستخرجة</h2>
-      <div id="details"></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">2. أسباب الاشتباه والتحذيرات</h2>
-      <p class="small">كل سبب يشرح المؤشر الذي اكتشفته الأداة، ولا يعني بالضرورة أن الدومين خبيث.</p>
-      <div id="findings"></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">3. توصيات الفحص اليدوي</h2>
-      <div id="recommendations"></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">4. التقرير النصي</h2>
-      <pre id="report"></pre>
-      <div style="display:flex;flex-wrap:wrap;gap:10px">
-        <button id="copyBtn" class="btn" type="button">نسخ التقرير</button>
-        <button id="downloadBtn" class="btn secondary" type="button">حفظ التقرير TXT</button>
-        <button id="resetBtn" class="btn secondary" type="button">مسح النتائج</button>
+      <div id="paneBulk" class="hidden">
+        <label class="t" for="bulk">ضع كل رابط في سطر مستقل (حتى 20)</label>
+        <div class="field"><textarea id="bulk" spellcheck="false" placeholder="https://example.com&#10;http://192.0.2.1/login"></textarea></div>
       </div>
+      <p class="hint">الأداة لا تزور الرابط ولا تتبع التحويلات. لا تفتح الروابط المشبوهة.</p>
+      <p class="err hidden" id="err" role="alert"></p>
+      <div class="actions"><button class="btn" id="go" type="submit">حلّل الآن</button></div>
+    </form>
+    <div class="samples"><small>جرّب:</small>
+      <button class="chip" data-s="https://example.com">مثال عادي</button>
+      <button class="chip" data-s="http://secure-login.paypa1-verify.example.net/account/verify?redirect=http://example.org">مؤشرات مريبة</button>
+      <button class="chip" data-s="http://192.0.2.1:8080/login">عنوان IP</button>
+      <button class="chip" data-s="https://bit.ly/abc123">رابط مختصر</button>
     </div>
-  </section>
+  </div>
+
+  <div class="card res hidden" id="res" aria-live="polite">
+    <div class="head">
+      <div><p class="hint" style="margin:0">نتيجة التحليل المحلي</p><h2 id="rt"></h2><p id="rs"></p></div>
+      <div class="ring" id="ring"><div><span><b id="sc">0</b>من 100</span></div></div>
+    </div>
+    <div class="grid2">
+      <div><h3>المؤشرات المرصودة <small id="cnt" style="color:var(--muted)"></small></h3><div id="finds"></div></div>
+      <div><h3>تفكيك الرابط</h3><dl id="parts"></dl><h3 style="margin-top:22px" id="qh">المعاملات</h3><dl id="qs"></dl></div>
+    </div>
+    <p class="note" id="disc"></p>
+    <div class="actions">
+      <button class="btn ghost" id="cpBtn">نسخ التقرير</button>
+      <button class="btn ghost" id="txtBtn">تنزيل TXT</button>
+      <button class="btn ghost" id="jsonBtn">تنزيل JSON</button>
+      <button class="btn ghost" id="newBtn">رابط آخر</button>
+    </div>
+  </div>
+
+  <div class="card res hidden" id="bres" style="overflow-x:auto">
+    <h3>نتائج الفحص الجماعي <small id="bcnt" style="color:var(--muted)"></small></h3>
+    <table><thead><tr><th>التصنيف</th><th>المؤشر</th><th>المؤشرات</th><th>الرابط</th></tr></thead><tbody id="btb"></tbody></table>
+    <div class="actions"><button class="btn ghost" id="csvBtn">تنزيل CSV</button></div>
+  </div>
+</section>
+
+<section class="s narrow" id="history">
+  <div class="title"><h2>سجل الفحص</h2><p>محفوظ في متصفحك فقط، ويمكنك مسحه في أي وقت.</p></div>
+  <div class="card">
+    <ul class="hist" id="hist"></ul>
+    <p class="hint hidden" id="noHist" style="margin:0">لا توجد عمليات فحص بعد.</p>
+    <div class="actions"><button class="btn ghost" id="clrHist">مسح السجل</button></div>
+  </div>
+</section>
+
+<section class="s" id="features">
+  <div class="title"><h2>ماذا تفحص الأداة؟</h2><p>مؤشرات واضحة بدل ادعاءات أمنية غير مؤكدة.</p></div>
+  <div class="cols">
+    <article class="feat"><em>🎣</em><h3>مؤشرات التصيد</h3><p>كلمات تسجيل الدخول والتحقق وكلمات المرور ولغة الاستعجال والجوائز في المسار والمعاملات.</p></article>
+    <article class="feat"><em>🏷</em><h3>انتحال العلامات</h3><p>اكتشاف الأخطاء المقصودة في الإملاء مثل paypa1 أو استبدال الحروف بأرقام، وأسماء العلامات داخل النطاقات الفرعية.</p></article>
+    <article class="feat"><em>🌐</em><h3>تحليل النطاق</h3><p>عناوين IP، النطاقات الدولية Punycode، الامتدادات عالية الخطورة، المنافذ غير الشائعة وخدمات الاختصار.</p></article>
+    <article class="feat"><em>↪</em><h3>إعادة التوجيه</h3><p>رصد معاملات التحويل المضمنة وروابط داخل روابط وملفات تنفيذية بامتداد مزدوج.</p></article>
+    <article class="feat"><em>📦</em><h3>فحص جماعي</h3><p>حلّل حتى 20 رابطًا دفعة واحدة وصدّر النتائج بصيغة CSV.</p></article>
+    <article class="feat"><em>🔒</em><h3>خصوصية كاملة</h3><p>كل شيء يعمل في متصفحك دون خادم أو تتبع أو حسابات.</p></article>
+  </div>
+</section>
+
+<section class="s narrow" id="faq">
+  <div class="title"><h2>أسئلة شائعة</h2></div>
+  <details><summary>هل يتم إرسال الرابط إلى خادم؟</summary><p>لا. يتم التحليل بالكامل داخل متصفحك، ولا يتصل الكود بأي خادم ولا بقواعد بيانات التهديدات.</p></details>
+  <details><summary>هل النتيجة تؤكد أمان الرابط؟</summary><p>لا. المؤشر إرشادي مبني على قواعد بنيوية ثابتة وقد تكون نتيجته إيجابية أو سلبية كاذبة. تحقق دائمًا من مصدر الرابط.</p></details>
+  <details><summary>لماذا يُصنّف رابط سليم على أنه مريب؟</summary><p>بعض المواقع الشرعية تستخدم عناوين IP أو منافذ مخصصة أو كلمات مثل login، فتظهر كمؤشرات دون أن تكون خطرًا فعليًا.</p></details>
+  <details><summary>هل الأداة مجانية؟</summary><p>نعم، مجانية بالكامل وبدون تسجيل أو إعلانات.</p></details>
+</section>
 </main>
 
-<footer>
-  <div class="logo gradient">4T-LINK</div>
-  <p>برمجة وتطوير عبدالفتاح عبدالحميد (ديبو)</p>
-  <p>محلل محلي لا يستخدم مصادر سمعة خارجية ولا يضمن اكتشاف التهديدات.</p>
-</footer>
-
-<div id="toast" role="status" aria-live="polite"></div>
+<footer><div class="wrap">
+  <div><strong>4T-LINK.</strong><br>تحليل الروابط يبدأ بالوعي.</div>
+  <div>برمجة و تطوير <strong>عبدالفتاح عبدالحميد (ديبو)</strong><br>© <span id="yr"></span> 4T-LINK. جميع الحقوق محفوظة.</div>
+</div></footer>
+<div id="toast" class="hidden" role="status"></div>
 
 <script>
-"use strict";
+'use strict';
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+$('#yr').textContent=new Date().getFullYear();
 
-/*
-  4T-LINK Local Analyzer
-  - No API
-  - No network requests
-  - No external JavaScript libraries
-  - URL string analysis only
-*/
+/* Theme */
+const root=document.documentElement;
+root.dataset.theme=store.get('4t-theme',matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+$('#themeBtn').onclick=()=>{const t=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=t;store.set('4t-theme',t)};
 
-const $ = id => document.getElementById(id);
-let latestReport = "";
+/* Helpers */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(tt);tt=setTimeout(()=>t.classList.add('hidden'),2400)}
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function lev(a,b){const m=[...Array(a.length+1)].map((_,i)=>[i]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]}
+function download(name,text,type){const a=el('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type:type+';charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('تم النسخ.')}catch{const t=el('textarea');t.value=text;document.body.appendChild(t);t.select();let ok=false;try{ok=document.execCommand('copy')}catch{}t.remove();toast(ok?'تم النسخ.':'تعذر النسخ.')}}
 
-function toast(message) {
-  $("toast").textContent = message;
-  $("toast").classList.add("show");
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => $("toast").classList.remove("show"), 2800);
-}
-
-function element(tag, className, text) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text !== undefined) el.textContent = text;
-  return el;
-}
-
-function addItem(container, title, description, type = "info") {
-  const symbols = {
-    good: "✓",
-    warn: "!",
-    bad: "×",
-    info: "i"
-  };
-  const item = element("div", "item");
-  const symbol = element("div", "symbol " + type, symbols[type] || "i");
-  const content = element("div");
-  content.append(
-    element("strong", "", title),
-    element("p", "", description)
-  );
-  item.append(symbol, content);
-  container.append(item);
-}
-
-function safeURL(raw) {
-  let value = raw.trim();
-
-  if (!value) throw new Error("اكتب دومين أو رابطًا أولًا.");
-  if (/\s/.test(value)) {
-    throw new Error("الرابط يحتوي على مسافات. راجع النص المدخل.");
+/* Parsing (never fetches or navigates) */
+function isIP(h){return /^\d{1,3}(\.\d{1,3}){3}$/.test(h)||(h.startsWith('[')&&h.endsWith(']'))}
+function parseInput(raw){
+  let v=raw.trim(),assumed=false;
+  if(!v)throw Error('اكتب رابطًا أولًا.');
+  if(v.length>2048)throw Error('الرابط أطول من الحد المسموح.');
+  if(/[\u0000-\u001F\u007F-\u009F]/.test(v))throw Error('الرابط يحتوي على محارف تحكم غير مسموح بها.');
+  if(/\s/.test(v))throw Error('الرابط يحتوي على مسافات.');
+  if(/^(javascript|data|vbscript|file|blob):/i.test(v))throw Error('هذا البروتوكول خطير وغير مدعوم. لا تفتح هذا النوع من الروابط.');
+  if(!/^https?:\/\//i.test(v)){
+    if(/^[^\/?#:@]+\.[^\/?#:@]{2,}([\/?#:].*)?$/.test(v)){v='https://'+v;assumed=true}
+    else throw Error('اكتب الرابط كاملًا بما في ذلك https:// أو http://');
   }
-
-  if (!/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)) {
-    value = "https://" + value;
-  }
-
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    throw new Error("تعذر تحليل الرابط. تأكد من صيغة الدومين.");
-  }
-
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw new Error("يدعم المحلل روابط HTTP وHTTPS فقط.");
-  }
-
-  if (!url.hostname) throw new Error("الرابط لا يحتوي على اسم مضيف.");
-
-  if (url.username || url.password) {
-    throw new Error("الرابط يحتوي على بيانات دخول مضمنة. لا تشارك روابط من هذا النوع.");
-  }
-
-  return { url, value: url.href };
+  let url;try{url=new URL(v)}catch{throw Error('صيغة الرابط غير صحيحة.')}
+  const host=url.hostname.toLowerCase().replace(/\.$/,'');
+  if(!host||host.length>253)throw Error('اسم النطاق غير صالح.');
+  if(!isIP(host)&&!(host.includes('.')&&host.split('.').every(l=>/^[a-z0-9_]([a-z0-9_-]{0,61}[a-z0-9_])?$/i.test(l))))throw Error('اسم النطاق غير صالح أو غير مكتمل.');
+  return{url,host,original:v,assumed};
 }
 
-function isIPv4(host) {
-  const parts = host.split(".");
-  if (parts.length !== 4) return false;
-  return parts.every(part =>
-    /^\d{1,3}$/.test(part) &&
-    Number(part) >= 0 &&
-    Number(part) <= 255
-  );
-}
+/* Detection data */
+const SHORT=new Set(['bit.ly','t.co','tinyurl.com','is.gd','cutt.ly','shorturl.at','rebrand.ly','rb.gy','ow.ly','buff.ly','lnkd.in','s.id','tiny.cc','goo.gl','t.ly']);
+const BADTLD=new Set(['zip','mov','tk','ml','ga','cf','gq','xyz','top','click','work','support','country','kim','loan','icu','buzz','cyou','rest','monster']);
+const BRANDS=['paypal','microsoft','apple','google','amazon','facebook','instagram','whatsapp','netflix','binance','telegram','youtube','linkedin','twitter','dropbox','outlook','steam','coinbase','metamask','visa','mastercard'];
+const TERMS=[
+ [/log-?in|sign-?in|signon/i,'كلمات مرتبطة بتسجيل الدخول','تظهر كلمات تسجيل دخول في عنوان الرابط.'],
+ [/verif|confirm|validate|authenticate/i,'كلمات مرتبطة بالتحقق','يحتوي العنوان على كلمات تطلب التحقق أو التأكيد.'],
+ [/passw(or)?d|credential|\botp\b|2fa/i,'كلمات مرتبطة ببيانات الاعتماد','يحتوي العنوان على مصطلحات مرتبطة بكلمات المرور أو الرموز.'],
+ [/wallet|seed-?phrase|private-?key|crypto|airdrop/i,'مصطلحات مالية حساسة','قد ترتبط بمحافظ أو مفاتيح مالية.'],
+ [/urgent|suspend|unlock|account-?alert|limited|expire/i,'لغة الاستعجال أو التهديد','كلمات قد تُستخدم للضغط على المستخدم.'],
+ [/free-?gift|claim|prize|giveaway|winner|reward/i,'وعود بجوائز أو هدايا','كلمات ترويجية شائعة في الاحتيال.'],
+ [/invoice|payment|billing|refund|bank/i,'كلمات مالية وفواتير','كلمات تُستخدم في رسائل الاحتيال المالي.']
+];
+const NORM={0:'o',1:'l',3:'e',4:'a',5:'s',7:'t','@':'a'};
 
-function isIPv6(host) {
-  return host.startsWith("[") && host.endsWith("]");
-}
-
-function isIp(host) {
-  return isIPv4(host) || isIPv6(host);
-}
-
-function privateOrSpecialIP(host) {
-  if (isIPv6(host)) {
-    const ip = host.slice(1, -1).toLowerCase();
-    if (ip === "::1") return "عنوان loopback محلي";
-    if (ip === "::") return "عنوان غير محدد";
-    if (/^(fc|fd|fe8|fe9|fea|feb)/i.test(ip)) return "عنوان IPv6 محلي أو خاص";
-    return "";
-  }
-
-  if (!isIPv4(host)) return "";
-
-  const p = host.split(".").map(Number);
-  if (p[0] === 10) return "عنوان IPv4 خاص";
-  if (p[0] === 127) return "عنوان loopback محلي";
-  if (p[0] === 169 && p[1] === 254) return "عنوان link-local";
-  if (p[0] === 172 && p[1] >= 16 && p[1] <= 31) return "عنوان IPv4 خاص";
-  if (p[0] === 192 && p[1] === 168) return "عنوان IPv4 خاص";
-  if (p[0] === 0) return "عنوان شبكة غير عام";
-  if (p[0] >= 224) return "عنوان multicast أو محجوز";
-  return "";
-}
-
-function entropy(text) {
-  if (!text) return 0;
-  const counts = {};
-  for (const ch of text) counts[ch] = (counts[ch] || 0) + 1;
-  let result = 0;
-  for (const count of Object.values(counts)) {
-    const p = count / text.length;
-    result -= p * Math.log2(p);
-  }
-  return result;
-}
-
-function levenshtein(a, b) {
-  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
-
-  for (let i = 1; i <= a.length; i++) {
-    let previous = row[0];
-    row[0] = i;
-
-    for (let j = 1; j <= b.length; j++) {
-      const old = row[j];
-      row[j] = Math.min(
-        row[j] + 1,
-        row[j - 1] + 1,
-        previous + (a[i - 1] === b[j - 1] ? 0 : 1)
-      );
-      previous = old;
+function analyze(p){
+  const{url,host,original,assumed}=p;const F=[],seen=new Set();let score=0;
+  const add=(pts,lvl,title,detail)=>{if(seen.has(title))return;seen.add(title);score+=pts;F.push({points:pts,level:lvl,title,detail})};
+  const labels=host.split('.'),ip=isIP(host),tld=labels[labels.length-1];
+  if(assumed)add(0,'info','تمت إضافة https:// تلقائيًا','لم يتضمن الإدخال بروتوكولًا فافترضت الأداة https://.');
+  if(url.protocol==='http:')add(18,'warning','الاتصال يستخدم HTTP','الاتصال غير مشفر. هذا لا يثبت أن الموقع ضار لكنه يقلل حماية الاتصال.');
+  if(ip)add(22,'danger','عنوان IP مباشر','الرابط يستهدف عنوان IP بدل اسم نطاق. بعض المواقع الشرعية تفعل ذلك أيضًا.');
+  if(labels.some(l=>l.startsWith('xn--')))add(22,'danger','نطاق دولي (Punycode)','قد تظهر حروف متشابهة بصريًا. تحقق من هوية النطاق، ولا يعني ذلك وحده وجود تصيد.');
+  if(/@/.test(original.split('?')[0].split('#')[0].replace(/^https?:\/\//i,'').split('/')[0])||url.username||url.password)add(26,'danger','بيانات دخول مضمنة أو رمز @','قد يُستخدم لتضليل قراءة النطاق الحقيقي. تحقق من اسم المضيف الفعلي.');
+  if((host.match(/-/g)||[]).length>=3)add(10,'warning','شرطات كثيرة في النطاق','قد تظهر في نطاقات مضللة لكنها ليست دليلًا قاطعًا.');
+  if(labels.length>=5)add(8,'warning','مستويات نطاق فرعية كثيرة','تعدد المستويات يصعّب قراءة النطاق الفعلي.');
+  if(host.length>=45)add(8,'warning','اسم نطاق طويل','أطول من المعتاد ويستحق التحقق من مصدره.');
+  if(labels.some(l=>l.length>35))add(8,'warning','مقطع طويل داخل النطاق','أحد أجزاء النطاق يحتوي عددًا كبيرًا من المحارف.');
+  if(SHORT.has(host))add(16,'warning','خدمة اختصار روابط','الوجهة النهائية مجهولة لأن الأداة لا تتبع التحويلات.');
+  if(!ip&&BADTLD.has(tld))add(12,'warning','امتداد نطاق عالي الاستخدام في الإساءة','الامتداد .'+tld+' يظهر كثيرًا في حملات الاحتيال، ولا يعني ذلك أن كل موقع به ضار.');
+  if(url.port&&!['80','443'].includes(url.port))add(8,'warning','منفذ غير شائع','الرابط يحدد منفذًا غير معتاد لتصفح الويب ('+url.port+').');
+  if(original.length>180)add(8,'warning','رابط طويل جدًا','الطول يصعّب مراجعة المسار والمعاملات.');
+  if(!ip){
+    const two=['co','com','org','net','gov','edu','ac'].includes(labels[labels.length-2])&&labels.length>2;
+    const sld=labels[labels.length-(two?3:2)]||'';
+    const sub=labels.slice(0,labels.length-(two?3:2)).join('.');
+    const fixed=sld.replace(/[013457@]/g,c=>NORM[c]);
+    for(const b of BRANDS){
+      if(sld===b)continue;
+      if(fixed!==sld&&(fixed===b||lev(fixed,b)<=1)&&sld.length>3){add(30,'danger','احتمال انتحال علامة تجارية','النطاق «'+sld+'» يشبه «'+b+'» مع استبدال حروف بأرقام أو أخطاء إملائية.');break}
+      if(sld.length>=5&&lev(sld,b)===1){add(26,'danger','احتمال تقليد اسم علامة تجارية','النطاق «'+sld+'» قريب جدًا من «'+b+'». تحقق من الإملاء.');break}
+      if(sld.includes(b)){add(18,'warning','اسم علامة تجارية داخل النطاق','النطاق «'+sld+'» يحتوي «'+b+'» وهذا لا يثبت ملكيته لهذه العلامة.');break}
+      if(sub.includes(b)){add(18,'warning','علامة تجارية في نطاق فرعي','ظهور «'+b+'» في نطاق فرعي لا يثبت أن الموقع يعود لها. افحص النطاق الأساسي.');break}
     }
+    if(/\d{4,}/.test(sld))add(6,'warning','أرقام كثيرة في اسم النطاق','قد تدل على نطاق مولّد آليًا.');
   }
-  return row[b.length];
+  const text=decodeSafe(url.pathname+url.search).slice(0,3000)+' '+host;
+  for(const[re,t,d]of TERMS)if(re.test(text))add(7,'warning',t,d);
+  if(/\.(pdf|docx?|xlsx?|jpe?g|png|txt)\.(exe|scr|bat|js|vbs|jar|apk|msi|ps1|zip)$/i.test(url.pathname))add(30,'danger','امتداد مزدوج لملف','الملف يبدو مستندًا لكنه ينتهي بامتداد تنفيذي. لا تقم بتنزيله.');
+  else if(/\.(exe|scr|bat|apk|msi|jar|vbs|ps1|dmg)$/i.test(url.pathname))add(14,'warning','رابط تنزيل ملف تنفيذي','المسار ينتهي بملف قابل للتشغيل. حمّل فقط من مصادر موثوقة.');
+  const qp=[...url.searchParams.entries()];
+  if(qp.some(([k,v])=>/^(url|redirect|redir|next|return|goto|dest|target|continue|link)$/i.test(k)&&/^(https?:)?\/\//i.test(v)))add(16,'warning','إعادة توجيه مضمنة','يحتوي الرابط على عنوان آخر في المعاملات وقد يُستخدم لإخفاء الوجهة.');
+  else if(/https?:\/\//i.test(url.pathname+url.search.slice(1)))add(8,'warning','رابط داخل رابط','يظهر عنوان http آخر داخل المسار أو الاستعلام.');
+  if(qp.some(([,v])=>v.length>120&&/^[A-Za-z0-9+/=_-]+$/.test(v)))add(6,'info','قيمة مشفرة طويلة','معامل طويل قد يكون Base64 أو رمز تتبع.');
+  if(/%[0-9a-f]{2}/i.test(url.pathname+url.search))add(3,'info','محارف مرمزة','يحتوي المسار أو الاستعلام على ترميز URL وهو شائع.');
+  if(!F.length)F.push({points:0,level:'info',title:'لم تُرصد مؤشرات واضحة',detail:'لم يجد التحليل أنماطًا محددة. هذا لا يعني أن الموقع آمن.'});
+  score=Math.min(100,score);
+  const cat=score>=45?{k:'high',title:'مؤشرات خطورة مرتفعة',sub:'رُصدت عدة مؤشرات تستدعي الحذر. لا تفتح الرابط قبل التحقق المستقل.',color:'var(--red)'}
+    :score>=18?{k:'mid',title:'يستحق المراجعة',sub:'رُصدت مؤشرات مريبة. تحقق من مصدر الرابط واسم النطاق.',color:'var(--amber)'}
+    :{k:'low',title:'مؤشرات مرصودة محدودة',sub:'لم تظهر مؤشرات كثيرة، لكن سلامة الرابط غير مؤكدة.',color:'var(--accent)'};
+  return{url:original,host,score,cat,findings:F,time:new Date().toLocaleString('ar-EG'),
+    parts:{'البروتوكول':url.protocol.replace(':',''),'المضيف':host,'المنفذ':url.port||'افتراضي','المسار':url.pathname||'/','الاستعلام':url.search||'—','الجزء':url.hash||'—'},
+    params:qp.slice(0,12)};
 }
+function decodeSafe(s){try{return decodeURIComponent(s)}catch{return s}}
 
-function detectBrandLookalike(host) {
-  const brands = [
-    "google", "microsoft", "apple", "amazon", "paypal",
-    "facebook", "instagram", "whatsapp", "netflix",
-    "youtube", "github", "outlook", "icloud", "binance",
-    "steam", "telegram", "tiktok", "adobe", "dropbox"
-  ];
-
-  const labels = host.toLowerCase().split(/[.-]/).filter(Boolean);
-  const hits = [];
-
-  for (const label of labels) {
-    if (label.length < 4 || label.length > 18) continue;
-
-    for (const brand of brands) {
-      if (label === brand) continue;
-
-      const distance = levenshtein(label, brand);
-      const threshold = brand.length >= 7 ? 2 : 1;
-
-      if (distance > 0 && distance <= threshold) {
-        hits.push({ label, brand, distance });
-      }
-    }
-  }
-
-  return hits.slice(0, 5);
+/* Rendering */
+let last=null;
+function render(r){
+  last=r;
+  $('#rt').textContent=r.cat.title;$('#rs').textContent=r.cat.sub;$('#sc').textContent=r.score;
+  $('#ring').style.setProperty('--s',r.score*3.6+'deg');$('#ring').style.setProperty('--c',r.cat.color);
+  $('#cnt').textContent='('+r.findings.length+')';
+  const fl=$('#finds');fl.replaceChildren();
+  for(const f of r.findings){const row=el('div','find '+f.level);row.append(el('span','dot'));const c=el('div');c.append(el('b','',f.title),el('span','',f.detail));row.append(c);fl.append(row)}
+  const pl=$('#parts');pl.replaceChildren();
+  for(const[k,v]of Object.entries(r.parts)){pl.append(el('dt','',k),el('dd','',v))}
+  const ql=$('#qs');ql.replaceChildren();
+  $('#qh').classList.toggle('hidden',!r.params.length);
+  for(const[k,v]of r.params)ql.append(el('dt','',k),el('dd','',v.length>80?v.slice(0,80)+'…':v));
+  $('#disc').textContent='المؤشر تقديري مبني على قواعد محلية ثابتة وليس احتمالًا إحصائيًا. لم تُراجع قواعد بيانات التهديدات ولم يُفتح الرابط. قد تكون النتيجة إيجابية أو سلبية كاذبة.';
+  $('#bres').classList.add('hidden');$('#res').classList.remove('hidden');
+  $('#res').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function reportText(r){return['4T-LINK — تقرير التحليل المحلي','التاريخ: '+r.time,'الرابط: '+r.url,'النطاق: '+r.host,'مؤشر الخطورة: '+r.score+'/100','التصنيف: '+r.cat.title,'','المؤشرات:',...r.findings.map((f,i)=>(i+1)+'. '+f.title+'\n   '+f.detail),'','تنبيه: تحليل بنيوي محلي فقط وليس فحصًا عبر قواعد بيانات التهديدات.','برمجة و تطوير عبدالفتاح عبدالحميد (ديبو)'].join('\n')}
 
-function analyze(raw) {
-  const parsed = safeURL(raw);
-  const url = parsed.url;
-  const full = parsed.value;
-  const host = url.hostname.toLowerCase();
-  const labels = host.split(".");
-  const params = [...url.searchParams.entries()];
-  const findings = [];
-  const recommendations = [];
-  let score = 0;
-
-  function flag(title, description, points, type = "warn") {
-    findings.push({ title, description, points, type });
-    score += points;
-  }
-
-  function note(title, description, type = "info") {
-    findings.push({ title, description, points: 0, type });
-  }
-
-  // 1. Protocol and transport indicators
-  if (url.protocol === "http:") {
-    flag(
-      "الاتصال يستخدم HTTP",
-      "الاتصال لا يستخدم HTTPS. هذا لا يثبت أن الموقع خبيث، لكنه لا يوفر تشفير النقل الذي يقدمه HTTPS.",
-      10
-    );
-  } else {
-    note(
-      "الرابط يستخدم HTTPS",
-      "الاتصال يستخدم بروتوكول HTTPS وفق النص المدخل. هذا لا يثبت أن الموقع موثوق أو أن شهادته سليمة.",
-      "good"
-    );
-  }
-
-  // 2. IP addresses and local/private destinations
-  if (isIp(host)) {
-    flag(
-      "الرابط يستخدم عنوان IP مباشرًا",
-      "استخدام عنوان IP بدل اسم نطاق قد يكون مشروعًا، لكنه يستحق التأكد من هوية الخادم.",
-      12
-    );
-
-    const privateDescription = privateOrSpecialIP(host);
-    if (privateDescription) {
-      flag(
-        "عنوان غير عام أو محلي",
-        privateDescription + ". إذا وصلك الرابط من مصدر غير موثوق فلا تفتحه؛ وقد يكون هدفه خدمة داخل شبكتك.",
-        12
-      );
-    }
-  }
-
-  // 3. Hostname and IDN indicators
-  if (host.includes("xn--")) {
-    flag(
-      "النطاق يحتوي على Punycode",
-      "قد تكون هذه صيغة لنطاق دولي. يمكن استغلال تشابه الحروف بين لغات مختلفة في هجمات homograph، لكن وجود Punycode وحده ليس دليلًا على الضرر.",
-      12
-    );
-  }
-
-  if (/[\u200B-\u200F\u202A-\u202E\u2060-\u206F]/u.test(raw)) {
-    flag(
-      "رموز Unicode غير مرئية أو اتجاهية",
-      "قد تؤثر هذه الرموز في طريقة عرض النص أو ترتيب الأحرف. تحقق من العنوان الفعلي قبل استخدامه.",
-      20,
-      "bad"
-    );
-  }
-
-  if (host.length > 55) {
-    flag(
-      "اسم مضيف طويل",
-      "اسم المضيف طويل نسبيًا وقد يصعب تمييز نطاقه الأساسي بصريًا.",
-      8
-    );
-  }
-
-  if (labels.length >= 5) {
-    flag(
-      "عدد كبير من مستويات النطاق",
-      "يحتوي المضيف على " + labels.length +
-      " أجزاء مفصولة بنقاط. قد يكون ذلك مشروعًا، لكن تحقق من الدومين المسجل الفعلي.",
-      8
-    );
-  }
-
-  if (labels.some(label => label.length >= 25)) {
-    flag(
-      "جزء طويل جدًا داخل النطاق",
-      "أحد أجزاء اسم المضيف طويل بشكل ملحوظ وقد يخفي كلمات أو معرفات يصعب قراءتها.",
-      7
-    );
-  }
-
-  if (host.split("").filter(ch => ch === "-").length >= 3) {
-    flag(
-      "كثرة الشرطات في اسم المضيف",
-      "الشرطات شائعة في الدومينات المشروعة أيضًا، لكن كثرتها قد تجعل العنوان مقلدًا أو مربكًا.",
-      6
-    );
-  }
-
-  const brandHits = detectBrandLookalike(host);
-  if (brandHits.length) {
-    flag(
-      "تشابه محتمل مع أسماء علامات معروفة",
-      "مقاطع متشابهة: " + brandHits.map(h =>
-        h.label + " (شبيه بـ " + h.brand + ")"
-      ).join("، ") +
-      ". هذا فحص تقريبي للنص ولا يثبت انتحال العلامة.",
-      18
-    );
-  }
-
-  // 4. Suspicious syntax
-  if (raw.includes("@")) {
-    flag(
-      "وجود رمز @",
-      "قد يُستخدم @ في معلومات المستخدم داخل URL لإرباك القارئ بشأن المضيف الفعلي. تم رفض بيانات الدخول المضمنة، لكن الرمز قد يظهر أيضًا في المسار أو الاستعلام.",
-      10
-    );
-  }
-
-  if (full.length > 180) {
-    flag(
-      "الرابط طويل جدًا",
-      "الرابط الطويل قد يخفي وجهة التحويل أو يحتوي على معلمات كثيرة. الطول وحده ليس دليلًا على الهجوم.",
-      6
-    );
-  }
-
-  const digitRatio = (host.match(/\d/g) || []).length / Math.max(host.length, 1);
-  if (host.length > 12 && digitRatio > 0.35 && !isIp(host)) {
-    flag(
-      "كثافة أرقام مرتفعة في اسم المضيف",
-      "توجد أرقام بنسبة مرتفعة نسبيًا في اسم النطاق، وقد يكون ذلك طبيعيًا في بعض الخدمات.",
-      5
-    );
-  }
-
-  if (/%[0-9a-f]{2}/i.test(full)) {
-    flag(
-      "وجود ترميز مئوي",
-      "يحتوي الرابط على ترميز %XX. قد يكون طبيعيًا، لكن الترميز المتكرر أو غير المتوقع قد يخفي محارف يصعب ملاحظتها.",
-      4
-    );
-  }
-
-  const encodedLayers = (full.match(/%25/gi) || []).length;
-  if (encodedLayers >= 3) {
-    flag(
-      "ترميز متكرر محتمل",
-      "تكرار %25 قد يشير إلى ترميز متعدد الطبقات. راجع الرابط بحذر ولا تفك ترميزه ثم تفتحه تلقائيًا.",
-      8
-    );
-  }
-
-  // 5. Ports
-  if (url.port) {
-    const commonPorts = ["80", "443", "8080", "8443"];
-    if (!commonPorts.includes(url.port)) {
-      flag(
-        "منفذ غير معتاد في الرابط",
-        "المنفذ المحدد هو " + url.port +
-        ". قد يكون مشروعًا، لكن لا تفتح خدمة غير متوقعة على منفذ غير مألوف.",
-        8
-      );
-    } else {
-      note(
-        "الرابط يحدد منفذًا صريحًا",
-        "المنفذ " + url.port + " معروف الاستخدام في بعض إعدادات الويب؛ لا يكفي ذلك للحكم على الأمان."
-      );
-    }
-  }
-
-  // 6. Redirect and credential-related query parameters
-  const redirectKeys = [
-    "url", "redirect", "redirect_url", "redirect_uri", "return",
-    "returnurl", "next", "continue", "target", "dest", "destination",
-    "callback", "goto", "out", "redir"
-  ];
-
-  const matchedRedirects = params
-    .filter(([key]) => redirectKeys.includes(key.toLowerCase()))
-    .map(([key]) => key);
-
-  if (matchedRedirects.length) {
-    flag(
-      "معلمات تحويل محتملة",
-      "تم العثور على: " + matchedRedirects.join(", ") +
-      ". قد تُستخدم هذه المعلمات بشكل مشروع أو في تحويل المستخدم إلى صفحة خارجية.",
-      9
-    );
-  }
-
-  const sensitiveKeys = [
-    "password", "passwd", "token", "access_token",
-    "api_key", "apikey", "secret", "session", "auth"
-  ];
-
-  const sensitiveParams = params
-    .filter(([key]) => sensitiveKeys.some(s => key.toLowerCase().includes(s)))
-    .map(([key]) => key);
-
-  if (sensitiveParams.length) {
-    flag(
-      "معلمات قد تحتوي بيانات حساسة",
-      "ظهرت أسماء معلمات مثل: " + sensitiveParams.join(", ") +
-      ". لا تشارك الرابط؛ فقد يحتوي على رمز وصول أو بيانات خاصة.",
-      12,
-      "bad"
-    );
-  }
-
-  // 7. Suspicious words
-  const suspiciousWords = [
-    "login", "signin", "verify", "verification", "password",
-    "wallet", "bank", "payment", "secure", "security",
-    "account", "update", "suspended", "unlock", "urgent",
-    "bonus", "gift", "prize", "free", "claim", "recover"
-  ];
-
-  const matchedWords = suspiciousWords.filter(word =>
-    (host + url.pathname + url.search).toLowerCase().includes(word)
-  );
-
-  if (matchedWords.length) {
-    flag(
-      "كلمات شائعة في روابط الخداع",
-      "الكلمات المطابقة: " + matchedWords.join(", ") +
-      ". قد تظهر في صفحات حقيقية أيضًا؛ السياق ومصدر الرابط مهمان.",
-      Math.min(12, matchedWords.length * 3)
-    );
-  }
-
-  // 8. File extensions
-  const dangerousExtensions = [
-    ".exe", ".msi", ".bat", ".cmd", ".scr",
-    ".ps1", ".vbs", ".js", ".apk", ".jar", ".hta"
-  ];
-
-  const pathLower = url.pathname.toLowerCase();
-  const fileExtension = dangerousExtensions.find(ext => pathLower.endsWith(ext));
-
-  if (fileExtension) {
-    flag(
-      "مسار ينتهي بامتداد ملف قابل للتنفيذ",
-      "الامتداد المكتشف: " + fileExtension +
-      ". لا تشغّل ملفًا غير متوقع. هذه قراءة للمسار وليست فحصًا للملف نفسه.",
-      18,
-      "bad"
-    );
-  }
-
-  // 9. Shorteners
-  const shorteners = [
-    "bit.ly", "t.co", "tinyurl.com", "is.gd", "cutt.ly",
-    "rebrand.ly", "rb.gy", "shorturl.at", "ow.ly",
-    "buff.ly", "lnkd.in", "tiny.cc"
-  ];
-
-  if (shorteners.some(domain => host === domain || host.endsWith("." + domain))) {
-    flag(
-      "خدمة اختصار روابط",
-      "الوجهة النهائية غير واضحة من النص وحده. افحصها بطريقة آمنة قبل فتح الرابط.",
-      10
-    );
-  }
-
-  // 10. Path and query entropy
-  const variablePart = url.pathname + url.search;
-  const entropyValue = entropy(variablePart);
-
-  if (variablePart.length > 45 && entropyValue > 4.3) {
-    flag(
-      "مسار أو استعلام ذو تنوع مرتفع",
-      "قد يحتوي الرابط على معرفات طويلة أو قيم عشوائية. هذا مؤشر ضعيف ولا يكشف محتوى القيم.",
-      5
-    );
-  }
-
-  if (params.length >= 10) {
-    flag(
-      "عدد كبير من معلمات الرابط",
-      "يحتوي الرابط على " + params.length +
-      " معلمة. راجعها إذا لم تتوقع هذا التعقيد.",
-      5
-    );
-  }
-
-  // 11. Fragments
-  if (url.hash && url.hash.length > 100) {
-    note(
-      "جزء Fragment طويل",
-      "الجزء بعد # قد يستخدمه التطبيق محليًا، وقد يحتوي على بيانات. لا تفترض أنه يُرسل إلى الخادم تلقائيًا."
-    );
-  }
-
-  // 12. Basic hostname validity checks
-  if (host.startsWith(".") || host.endsWith(".") || host.includes("..")) {
-    flag(
-      "تركيب غير معتاد في اسم المضيف",
-      "يحتوي اسم المضيف على نقاط متجاورة أو في موضع غير معتاد.",
-      15,
-      "bad"
-    );
-  }
-
-  if (!isIp(host) && !host.includes(".")) {
-    note(
-      "اسم المضيف لا يحتوي على نقطة",
-      "قد يكون اسم مضيف محليًا أو اسمًا غير مكتمل؛ لا يمكن تحديد النطاق المسجل منه وحده.",
-      "warn"
-    );
-  }
-
-  // 13. Recommendations based on findings
-  if (brandHits.length) {
-    recommendations.push(
-      "اكتب اسم العلامة التجارية يدويًا في المتصفح بدل استخدام هذا الرابط."
-    );
-  }
-
-  if (matchedRedirects.length) {
-    recommendations.push(
-      "افحص وجهة التحويل النهائية، ولا تعتمد على اسم الصفحة الظاهر وحده."
-    );
-  }
-
-  if (sensitiveParams.length) {
-    recommendations.push(
-      "احذف الرابط من الرسائل العامة؛ قد يحتوي على رموز جلسات أو بيانات حساسة."
-    );
-  }
-
-  if (fileExtension) {
-    recommendations.push(
-      "لا تنزّل الملف أو تشغّله إلا بعد التأكد من مصدره وفحصه بأداة مناسبة."
-    );
-  }
-
-  if (url.protocol === "http:") {
-    recommendations.push(
-      "لا تدخل كلمات مرور أو بيانات دفع في صفحة لا تستخدم HTTPS."
-    );
-  }
-
-  recommendations.push(
-    "تحقق من الدومين المسجل الفعلي؛ اسم العلامة داخل النطاق الفرعي لا يعني أن الموقع تابع لها."
-  );
-
-  recommendations.push(
-    "لا تضغط على الرابط إذا وصلك في رسالة غير متوقعة أو مصحوبة بتهديد أو استعجال."
-  );
-
-  recommendations.push(
-    "للتأكد من السمعة الحالية تحتاج إلى مصدر تهديدات أو فحص شبكي مستقل؛ هذه النسخة لا تتصل بالإنترنت."
-  );
-
-  return {
-    url: full,
-    parsed: url,
-    host,
-    labels,
-    params,
-    findings,
-    recommendations: [...new Set(recommendations)],
-    score: Math.min(100, score),
-    entropyValue
-  };
+/* History */
+function renderHist(){
+  const h=store.get('4t-hist',[]),ul=$('#hist');ul.replaceChildren();
+  $('#noHist').classList.toggle('hidden',h.length>0);$('#clrHist').classList.toggle('hidden',!h.length);
+  for(const i of h){const li=el('li');li.tabIndex=0;li.title='إعادة التحليل';
+    const b=el('span','badge b-'+i.k,i.score+' · '+i.t);li.append(el('span','',i.url),b);
+    const go=()=>{setTab(false);$('#url').value=i.url;$('#form').requestSubmit();$('#scan').scrollIntoView({behavior:'smooth'})};
+    li.onclick=go;li.onkeydown=e=>{if(e.key==='Enter')go()};ul.append(li)}
 }
+function pushHist(r){const h=store.get('4t-hist',[]).filter(x=>x.url!==r.url);h.unshift({url:r.url.slice(0,200),score:r.score,k:r.cat.k,t:r.cat.title});store.set('4t-hist',h.slice(0,10));renderHist()}
+$('#clrHist').onclick=()=>{store.set('4t-hist',[]);renderHist();toast('تم مسح السجل.')};
 
-function renderAnalysis(result) {
-  const {
-    url, parsed, host, labels, params,
-    findings, recommendations, score
-  } = result;
+/* Tabs */
+let bulk=false;
+function setTab(b){bulk=b;$('#tabOne').setAttribute('aria-selected',!b);$('#tabBulk').setAttribute('aria-selected',b);$('#paneOne').classList.toggle('hidden',b);$('#paneBulk').classList.toggle('hidden',!b);clearErr()}
+$('#tabOne').onclick=()=>setTab(false);$('#tabBulk').onclick=()=>setTab(true);
+function showErr(m){const e=$('#err');e.textContent=m;e.classList.remove('hidden')}
+function clearErr(){$('#err').classList.add('hidden')}
 
-  $("results").classList.remove("hidden");
-  $("urlLength").textContent = url.length;
-  $("subdomainCount").textContent = labels.length;
-  $("paramCount").textContent = params.length;
-  $("findingCount").textContent = findings.length;
-  $("scoreText").textContent = score + "/100";
-
-  const fill = $("meterFill");
-  fill.style.width = score + "%";
-
-  let level, title, description, color;
-
-  if (score >= 45) {
-    level = "red";
-    title = "مؤشرات اشتباه مرتفعة";
-    description = "اجتمعت عدة مؤشرات نصية تستحق الحذر. هذه النتيجة لا تثبت أن الدومين خبيث.";
-    color = "var(--red)";
-  } else if (score >= 20) {
-    level = "yellow";
-    title = "مؤشرات اشتباه متوسطة";
-    description = "ظهرت مؤشرات تستحق المراجعة قبل زيارة الموقع أو إدخال بيانات.";
-    color = "var(--yellow)";
-  } else {
-    level = "green";
-    title = "مؤشرات نصية محدودة";
-    description = "لم تتجاوز القواعد المحلية مستوى الاشتباه المحدود. هذا لا يعني أن الموقع آمن.";
-    color = "var(--green)";
+/* Submit */
+$('#form').addEventListener('submit',e=>{
+  e.preventDefault();clearErr();
+  if(bulk){
+    const lines=$('#bulk').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!lines.length)return showErr('أضف رابطًا واحدًا على الأقل.');
+    if(lines.length>20)return showErr('الحد الأقصى 20 رابطًا في المرة الواحدة.');
+    const rows=lines.map(l=>{try{return{ok:true,r:analyze(parseInput(l))}}catch(x){return{ok:false,l,m:x.message}}});
+    const tb=$('#btb');tb.replaceChildren();
+    for(const x of rows){const tr=el('tr');
+      if(x.ok){const b=el('span','badge b-'+x.r.cat.k,x.r.cat.title);const td=el('td');td.append(b);tr.append(td,el('td','',x.r.score+'/100'),el('td','',x.r.findings.filter(f=>f.points>0).length),el('td','u',x.r.url))}
+      else{tr.append(el('td','','غير صالح'),el('td','','—'),el('td','','—'),el('td','u',x.l+' ('+x.m+')'))}
+      tb.append(tr)}
+    window._bulk=rows;$('#bcnt').textContent='('+rows.length+')';
+    $('#res').classList.add('hidden');$('#bres').classList.remove('hidden');$('#bres').scrollIntoView({behavior:'smooth'});
+    return;
   }
-
-  $("verdictTitle").textContent = title;
-  $("verdictText").textContent = description;
-  $("verdictBadge").className = "badge " + level;
-  $("verdictBadge").textContent =
-    level === "red" ? "حذر مرتفع" :
-    level === "yellow" ? "يتطلب المراجعة" : "مؤشرات محدودة";
-  fill.style.background = color;
-
-  const details = $("details");
-  details.replaceChildren();
-
-  const rows = [
-    ["الرابط المعياري", url],
-    ["البروتوكول", parsed.protocol],
-    ["اسم المضيف", host],
-    ["اسم المضيف بصيغة Unicode إن أمكن", unicodeHostname(host)],
-    ["المنفذ الصريح", parsed.port || "لم يُحدد"],
-    ["المسار", parsed.pathname || "/"],
-    ["عدد معلمات الاستعلام", String(params.length)],
-    ["Fragment", parsed.hash || "لا يوجد"],
-    ["نوع المضيف", isIp(host) ? "عنوان IP" : "اسم مضيف"],
-    ["عنوان IP خاص أو محلي", privateOrSpecialIP(host) || "لم يُكتشف وفق القواعد المحلية"],
-    ["تنوع النص (Entropy)", result.entropyValue.toFixed(2) + " bits/character"]
-  ];
-
-  rows.forEach(([title, value]) => {
-    addItem(details, title, value, "info");
-  });
-
-  if (params.length) {
-    addItem(
-      details,
-      "أسماء معلمات الاستعلام",
-      params.map(([key]) => key).join(", "),
-      "info"
-    );
-  }
-
-  const findingsBox = $("findings");
-  findingsBox.replaceChildren();
-
-  if (!findings.length) {
-    addItem(
-      findingsBox,
-      "لم تُفعّل قواعد التحذير",
-      "لم تظهر مؤشرات ضمن القواعد المحلية الحالية. هذا لا يساوي نتيجة فحص أمني إيجابية.",
-      "good"
-    );
-  } else {
-    findings.forEach(item => {
-      addItem(
-        findingsBox,
-        item.title + (item.points ? " (+" + item.points + ")" : ""),
-        item.description,
-        item.type === "bad" ? "bad" :
-        item.type === "warn" ? "warn" :
-        item.type === "good" ? "good" : "info"
-      );
-    });
-  }
-
-  const recBox = $("recommendations");
-  recBox.replaceChildren();
-  recommendations.forEach((text, i) => {
-    addItem(recBox, "التوصية " + (i + 1), text, "info");
-  });
-
-  latestReport = buildReport(result, title, description);
-  $("report").textContent = latestReport;
-  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function unicodeHostname(host) {
-  try {
-    // URL API may normalize IDNs to punycode. Displaying the same host
-    // is safer than relying on a nonstandard decoder.
-    return host;
-  } catch {
-    return host;
-  }
-}
-
-function buildReport(result, title, description) {
-  const lines = [
-    "4T-LINK - LOCAL DOMAIN ANALYSIS",
-    "================================",
-    "URL: " + result.url,
-    "Hostname: " + result.host,
-    "Protocol: " + result.parsed.protocol,
-    "Port: " + (result.parsed.port || "default"),
-    "Path: " + result.parsed.pathname,
-    "Query parameters: " + result.params.length,
-    "Heuristic score: " + result.score + "/100",
-    "Verdict: " + title,
-    "Interpretation: " + description,
-    "",
-    "FINDINGS",
-    "--------"
-  ];
-
-  result.findings.forEach(item => {
-    lines.push(
-      "[" + (item.points ? "+" + item.points : "INFO") + "] " + item.title,
-      item.description,
-      ""
-    );
-  });
-
-  lines.push("RECOMMENDATIONS", "---------------");
-  result.recommendations.forEach((item, i) => {
-    lines.push((i + 1) + ". " + item);
-  });
-
-  lines.push(
-    "",
-    "LIMITATIONS",
-    "-----------",
-    "This report is based on local URL string heuristics only.",
-    "No DNS lookup, HTTP request, certificate validation, malware scan,",
-    "domain reputation lookup, or website content inspection was performed.",
-    "A low score does not establish that a domain is safe."
-  );
-
-  return lines.join("\n");
-}
-
-$("scanForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  try {
-    const result = analyze($("urlInput").value);
-    renderAnalysis(result);
-    toast("اكتمل التحليل المحلي");
-  } catch (error) {
-    toast(error.message || "تعذر تحليل الرابط");
-  }
+  let p;try{p=parseInput($('#url').value)}catch(x){showErr(x.message);$('#url').focus();return}
+  const b=$('#go');b.disabled=true;b.innerHTML='جارٍ التحليل<span class="sp"></span>';
+  setTimeout(()=>{try{const r=analyze(p);render(r);pushHist(r)}catch{showErr('حدث خطأ أثناء التحليل.')}finally{b.disabled=false;b.textContent='حلّل الآن'}},300);
 });
+$('#url').addEventListener('input',clearErr);
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{setTab(false);$('#url').value=b.dataset.s;clearErr();$('#url').focus()});
+$('#pasteBtn').onclick=async()=>{try{$('#url').value=await navigator.clipboard.readText();clearErr();toast('تم اللصق. راجع الرابط قبل التحليل.')}catch{toast('تعذر الوصول للحافظة. الصق يدويًا.')}$('#url').focus()};
 
-$("copyBtn").addEventListener("click", async () => {
-  if (!latestReport) return toast("لا يوجد تقرير لنسخه");
+/* Actions */
+$('#cpBtn').onclick=()=>last&&copy(reportText(last));
+$('#txtBtn').onclick=()=>last&&download('4t-link-report.txt',reportText(last),'text/plain');
+$('#jsonBtn').onclick=()=>last&&download('4t-link-report.json',JSON.stringify({url:last.url,host:last.host,score:last.score,category:last.cat.title,findings:last.findings,time:last.time},null,2),'application/json');
+$('#newBtn').onclick=()=>{$('#url').value='';$('#res').classList.add('hidden');last=null;scrollTo({top:0,behavior:'smooth'});$('#url').focus()};
+$('#csvBtn').onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""').replace(/^[=+\-@]/,"'$&")+'"';
+  download('4t-link-bulk.csv',['url,score,category,indicators',...(window._bulk||[]).map(x=>x.ok?[q(x.r.url),x.r.score,q(x.r.cat.title),x.r.findings.filter(f=>f.points>0).length].join(','):[q(x.l),'',q('invalid'),''].join(','))].join('\n'),'text/csv')};
 
-  try {
-    await navigator.clipboard.writeText(latestReport);
-    toast("تم نسخ التقرير");
-  } catch {
-    const area = document.createElement("textarea");
-    area.value = latestReport;
-    document.body.append(area);
-    area.select();
-
-    try {
-      document.execCommand("copy");
-      toast("تم نسخ التقرير");
-    } catch {
-      toast("تعذر النسخ تلقائيًا؛ حدد التقرير وانسخه يدويًا");
-    }
-    area.remove();
-  }
-});
-
-$("downloadBtn").addEventListener("click", () => {
-  if (!latestReport) return toast("لا يوجد تقرير لحفظه");
-
-  const blob = new Blob(["\uFEFF" + latestReport], {
-    type: "text/plain;charset=utf-8"
-  });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "4T-LINK-report.txt";
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(link.href);
-});
-
-$("resetBtn").addEventListener("click", () => {
-  $("urlInput").value = "";
-  $("results").classList.add("hidden");
-  $("details").replaceChildren();
-  $("findings").replaceChildren();
-  $("recommendations").replaceChildren();
-  $("report").textContent = "";
-  latestReport = "";
-  $("urlInput").focus();
-  toast("تم مسح النتائج");
-});
-
-let splashDone = false;
-function finishSplash() {
-  if (splashDone) return;
-  splashDone = true;
-  $("splash").classList.add("done");
-  setTimeout(() => toast("مرحبًا بك في 4T-LINK"), 400);
-}
-setTimeout(finishSplash, 4000);
+renderHist();
 </script>
 </body>
 </html>
