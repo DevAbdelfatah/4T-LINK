@@ -1,0 +1,934 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080b14" />
+  <meta name="description" content="4T-LINK — أداة تحليل مؤشرات خطورة الروابط واكتشاف الأنماط المشبوهة." />
+  <title>4T-LINK | محلل أمان الروابط</title>
+
+  <!-- Cairo Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif']
+          },
+          colors: {
+            ink: '#080b14',
+            panel: '#101522',
+            accent: '#70f0c0',
+            blueglow: '#6c8cff'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b14;
+      --panel: #101522;
+      --border: rgba(255,255,255,.085);
+      --muted: #8e9bb2;
+      --accent: #70f0c0;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-color: #303b51 var(--bg);
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 50% -15%, rgba(60,95,190,.16), transparent 48%),
+        var(--bg);
+      color: #edf2ff;
+      font-family: 'Cairo', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+      pointer-events: none;
+    }
+
+    .glass {
+      background: linear-gradient(145deg, rgba(19,26,43,.96), rgba(12,16,28,.96));
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 65px rgba(0,0,0,.17);
+    }
+
+    .brand-mark {
+      background: linear-gradient(140deg, #8affd2, #4ea8ff);
+      box-shadow: 0 0 25px rgba(112,240,192,.15);
+    }
+
+    .input-shell {
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .input-shell:focus-within {
+      border-color: rgba(112,240,192,.65);
+      box-shadow: 0 0 0 4px rgba(112,240,192,.06);
+    }
+
+    .primary-btn {
+      background: linear-gradient(110deg, #87ffd2, #6cc8ff);
+      color: #07131b;
+      transition: transform .2s, filter .2s, opacity .2s;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.07);
+      transform: translateY(-1px);
+    }
+
+    .primary-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,.022);
+      border: 1px solid var(--border);
+      transition: border-color .2s, transform .2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(112,240,192,.24);
+      transform: translateY(-2px);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(112,240,192,.6);
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(7,19,27,.25);
+      border-top-color: #07131b;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(9px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .appear { animation: appear .35s ease both; }
+
+    .score-ring {
+      --score: 0deg;
+      background: conic-gradient(
+        var(--ring-color, #70f0c0) var(--score),
+        rgba(255,255,255,.075) var(--score)
+      );
+    }
+
+    .score-inner { background: #111725; }
+
+    .result-row {
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .result-row:last-child { border-bottom: 0; }
+
+    .sample-btn {
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.025);
+      transition: .2s;
+    }
+
+    .sample-btn:hover {
+      border-color: rgba(112,240,192,.4);
+      color: var(--accent);
+    }
+
+    :focus-visible {
+      outline: 2px solid #70f0c0;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-cairo antialiased">
+  <div class="fixed inset-0 grid-bg" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="relative z-10 border-b border-white/[.07]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[76px] flex items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3 shrink-0" aria-label="4T-LINK الرئيسية">
+        <span class="brand-mark w-11 h-11 rounded-2xl flex items-center justify-center text-[#07131b]">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </span>
+        <span>
+          <span class="block font-black text-xl tracking-wide">4T-LINK<span class="text-accent">.</span></span>
+          <span class="block text-[10px] text-slate-500 -mt-1 tracking-wider">URL INTELLIGENCE</span>
+        </span>
+      </a>
+
+      <div class="hidden sm:flex items-center gap-2 rounded-full border border-white/[.08] px-3 py-2 text-xs text-slate-400">
+        <span class="status-dot"></span>
+        تحليل محلي · بدون Backend
+      </div>
+
+      <a href="#about" class="text-sm text-slate-400 hover:text-white transition-colors">
+        عن الأداة
+      </a>
+    </div>
+  </header>
+
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Hero -->
+    <section class="pt-14 sm:pt-20 lg:pt-24 pb-10 sm:pb-14 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/[.05] text-emerald-200 text-xs mb-6">
+        <i data-lucide="scan-search" class="w-4 h-4"></i>
+        محلل مؤشرات خطورة الروابط
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.45] tracking-tight">
+        قبل ما تفتح الرابط،
+        <br class="hidden sm:block" />
+        <span class="text-transparent bg-clip-text bg-gradient-to-l from-[#70f0c0] via-[#7bd7ef] to-[#8c9fff]">
+          افهم مخاطره.
+        </span>
+      </h1>
+
+      <p class="text-slate-400 text-sm sm:text-base leading-8 max-w-2xl mx-auto mt-5 px-1">
+        حلّل عنوان URL واكتشف مؤشرات التصيد والأنماط المشبوهة
+        قبل التفاعل معه. الفحص الحالي محلي ولا يتصل بقواعد بيانات التهديدات.
+      </p>
+    </section>
+
+    <!-- Scanner -->
+    <section class="max-w-4xl mx-auto" aria-label="فحص رابط">
+      <div class="glass rounded-2xl sm:rounded-3xl p-4 sm:p-7 lg:p-8">
+        <div class="flex items-center justify-between gap-3 mb-5">
+          <div>
+            <h2 class="font-bold text-base sm:text-lg">افحص رابطًا جديدًا</h2>
+            <p class="text-xs text-slate-500 mt-1">الصق الرابط كما هو، بدون فتحه.</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-white/[.04] border border-white/[.06] flex items-center justify-center text-accent shrink-0">
+            <i data-lucide="scan-line" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <form id="scanForm" novalidate>
+          <label for="urlInput" class="block text-sm text-slate-300 font-semibold mb-2">
+            عنوان الرابط URL
+          </label>
+
+          <div class="input-shell flex flex-col sm:flex-row gap-2 p-2 rounded-2xl bg-[#090d17] border border-white/[.10]">
+            <div class="flex items-center gap-3 flex-1 min-w-0 px-2">
+              <i data-lucide="link-2" class="w-5 h-5 text-slate-500 shrink-0"></i>
+              <input
+                id="urlInput"
+                type="text"
+                inputmode="url"
+                autocomplete="url"
+                autocapitalize="none"
+                spellcheck="false"
+                maxlength="4096"
+                placeholder="https://example.com"
+                aria-describedby="inputHelp"
+                class="w-full min-w-0 bg-transparent py-3 text-sm text-white placeholder:text-slate-600 outline-none"
+              />
+              <button type="button" id="pasteBtn" class="shrink-0 p-2 rounded-lg text-slate-400 hover:text-accent hover:bg-white/[.04]" aria-label="لصق الرابط" title="لصق">
+                <i data-lucide="clipboard-paste" class="w-5 h-5"></i>
+              </button>
+            </div>
+
+            <button
+              id="scanBtn"
+              type="submit"
+              class="primary-btn min-h-[48px] rounded-xl px-7 font-extrabold text-sm flex items-center justify-center gap-2 shrink-0"
+            >
+              <i data-lucide="scan-search" class="w-5 h-5" id="scanIcon"></i>
+              <span id="scanLabel">حلّل الرابط</span>
+            </button>
+          </div>
+
+          <p id="inputHelp" class="text-xs text-slate-500 mt-3 leading-6">
+            لا تفتح الروابط المشبوهة. الأداة لا تزور الرابط ولا تتحقق من محتوى الصفحة.
+          </p>
+          <p id="inputError" role="alert" class="hidden text-sm text-red-300 mt-3"></p>
+        </form>
+
+        <!-- Sample URLs -->
+        <div class="mt-6">
+          <p class="text-xs text-slate-500 mb-3">جرّب التحليل على أمثلة محلية:</p>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="sample-btn rounded-lg px-3 py-2 text-xs text-slate-400" data-sample="https://example.com">
+              <span class="text-emerald-300 ml-1">●</span> مثال عادي
+            </button>
+            <button type="button" class="sample-btn rounded-lg px-3 py-2 text-xs text-slate-400" data-sample="http://secure-login.example.net/verify?redirect=http://example.org">
+              <span class="text-amber-300 ml-1">●</span> مؤشرات مريبة
+            </button>
+            <button type="button" class="sample-btn rounded-lg px-3 py-2 text-xs text-slate-400" data-sample="http://192.0.2.1/login">
+              <span class="text-red-300 ml-1">●</span> عنوان IP
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-600 mt-2">الأمثلة توضيحية فقط، ولا تمثل مواقع ضارة حقيقية.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section id="results" class="max-w-4xl mx-auto mt-6 hidden" aria-live="polite" aria-atomic="false">
+      <div class="glass rounded-2xl sm:rounded-3xl p-4 sm:p-7 appear">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-5 pb-6 border-b border-white/[.07]">
+          <div class="flex items-start gap-3 min-w-0">
+            <div id="resultIconBox" class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">
+              <i data-lucide="shield-alert" id="resultIcon" class="w-6 h-6"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs text-slate-500 mb-1">نتيجة التحليل المحلي</p>
+              <h2 id="resultTitle" class="font-extrabold text-lg sm:text-xl"></h2>
+              <p id="resultSubtitle" class="text-sm text-slate-400 mt-1 leading-7"></p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 sm:flex-col sm:items-center sm:min-w-[108px]">
+            <div id="scoreRing" class="score-ring w-[76px] h-[76px] rounded-full flex items-center justify-center shrink-0">
+              <div class="score-inner w-[62px] h-[62px] rounded-full flex flex-col items-center justify-center">
+                <span id="scoreValue" class="text-xl font-black leading-6">—</span>
+                <span class="text-[9px] text-slate-500">من 100</span>
+              </div>
+            </div>
+            <span class="text-xs text-slate-400">مؤشر خطورة إرشادي</span>
+          </div>
+        </div>
+
+        <div class="py-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 class="font-bold text-sm">مؤشرات التحليل</h3>
+            <span id="findingCount" class="text-xs text-slate-500"></span>
+          </div>
+          <div id="findingsList" class="rounded-xl border border-white/[.06] px-3 sm:px-4"></div>
+        </div>
+
+        <div class="rounded-xl bg-amber-400/[.055] border border-amber-300/10 p-4 flex gap-3">
+          <i data-lucide="info" class="w-5 h-5 text-amber-300 shrink-0 mt-1"></i>
+          <p id="resultDisclaimer" class="text-xs sm:text-sm text-slate-400 leading-7">
+            هذه نتيجة تحليل بنيوي محلي وليست تأكيدًا لسلامة الرابط أو خطورته.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 mt-5">
+          <button type="button" id="copyReportBtn" class="flex-1 rounded-xl border border-white/[.09] hover:border-white/20 bg-white/[.025] py-3 px-4 text-sm font-semibold flex justify-center items-center gap-2">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            نسخ التقرير
+          </button>
+          <button type="button" id="clearBtn" class="flex-1 rounded-xl bg-white/[.06] hover:bg-white/[.09] py-3 px-4 text-sm font-semibold flex justify-center items-center gap-2">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            تحليل رابط آخر
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-16 sm:py-20" id="about">
+      <div class="text-center mb-9">
+        <p class="text-xs tracking-widest text-accent font-bold mb-3">CORE CAPABILITIES</p>
+        <h2 class="text-2xl sm:text-3xl font-black">إيه اللي الأداة بتفحصه؟</h2>
+        <p class="text-sm text-slate-500 mt-3">مؤشرات واضحة بدل ادعاءات أمنية غير مؤكدة.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <article class="feature-card rounded-2xl p-5 sm:p-6">
+          <div class="w-11 h-11 rounded-xl bg-amber-400/10 text-amber-300 flex items-center justify-center mb-4">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold mb-2">مؤشرات التصيد</h3>
+          <p class="text-sm text-slate-400 leading-7">رصد بعض الكلمات المريبة في المسار والاستعلام، مثل login وverify وpassword.</p>
+        </article>
+
+        <article class="feature-card rounded-2xl p-5 sm:p-6">
+          <div class="w-11 h-11 rounded-xl bg-blue-400/10 text-blue-300 flex items-center justify-center mb-4">
+            <i data-lucide="network" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold mb-2">تحليل النطاق</h3>
+          <p class="text-sm text-slate-400 leading-7">اكتشاف استخدام عنوان IP أو بيانات دخول مضمنة أو بعض خدمات اختصار الروابط.</p>
+        </article>
+
+        <article class="feature-card rounded-2xl p-5 sm:p-6">
+          <div class="w-11 h-11 rounded-xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center mb-4">
+            <i data-lucide="file-check-2" class="w-5 h-5"></i>
+          </div>
+          <h3 class="font-bold mb-2">تقرير قابل للنسخ</h3>
+          <p class="text-sm text-slate-400 leading-7">عرض المؤشرات التي تم رصدها وشرحها، مع إمكانية نسخ التقرير لمراجعته لاحقًا.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Limitations -->
+    <section class="max-w-4xl mx-auto mb-14">
+      <div class="rounded-2xl border border-white/[.07] bg-white/[.018] p-5 sm:p-6">
+        <div class="flex gap-3 items-start">
+          <i data-lucide="lock-keyhole" class="w-6 h-6 text-slate-400 shrink-0 mt-1"></i>
+          <div>
+            <h2 class="font-bold mb-2">الخصوصية وحدود الفحص</h2>
+            <p class="text-sm text-slate-400 leading-7">
+              تتم معالجة الرابط داخل المتصفح ولا يُرسل إلى خادم فحص من هذا الكود.
+              لا يتم فتح الرابط أو اتباع التحويلات. قد تفلت روابط ضارة من التحليل،
+              وقد تبدو روابط سليمة مريبة. لا تدخل روابط تحتوي على رموز دخول أو بيانات سرية
+              في أي خدمة فحص خارجية دون فهم سياسة الخصوصية الخاصة بها.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-white/[.07]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-right">
+      <div>
+        <p class="font-extrabold text-lg">4T-LINK<span class="text-accent">.</span></p>
+        <p class="text-xs text-slate-500 mt-1">تحليل الروابط يبدأ بالوعي.</p>
+      </div>
+      <div class="text-sm text-slate-400 leading-7">
+        برمجة و تطوير <span class="text-white font-bold">عبدالفتاح عبدالحميد (ديبو)</span>
+        <p class="text-xs text-slate-600 mt-1">© <span id="year"></span> 4T-LINK. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden max-w-[calc(100%-32px)] rounded-xl border border-white/10 bg-[#171e2e] px-5 py-3 text-sm shadow-2xl"></div>
+
+  <script>
+    'use strict';
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const form = $('#scanForm');
+    const input = $('#urlInput');
+    const scanBtn = $('#scanBtn');
+    const scanLabel = $('#scanLabel');
+    const scanIcon = $('#scanIcon');
+    const errorBox = $('#inputError');
+    const results = $('#results');
+    const toast = $('#toast');
+
+    let lastReport = null;
+    let toastTimeout = null;
+
+    $('#year').textContent = new Date().getFullYear();
+
+    // Initialize real Lucide SVG icons.
+    function refreshIcons() {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    refreshIcons();
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.remove('hidden');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2600);
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.remove('hidden');
+      input.setAttribute('aria-invalid', 'true');
+    }
+
+    function clearError() {
+      errorBox.textContent = '';
+      errorBox.classList.add('hidden');
+      input.removeAttribute('aria-invalid');
+    }
+
+    // Parse only. Never navigate to or fetch the supplied URL.
+    function parseInput(raw) {
+      const value = raw.trim();
+
+      if (!value) {
+        throw new Error('اكتب رابطًا أولًا علشان نقدر نحلله.');
+      }
+
+      if (value.length > 2048) {
+        throw new Error('الرابط أطول من الحد المسموح للتحليل.');
+      }
+
+      if (/[\u0000-\u001F\u007F-\u009F]/.test(value)) {
+        throw new Error('الرابط يحتوي على محارف تحكم غير مسموح بها.');
+      }
+
+      if (/\s/.test(value)) {
+        throw new Error('الرابط يحتوي على مسافات. راجع العنوان وحاول مرة أخرى.');
+      }
+
+      // Require an explicit HTTP(S) scheme. Never silently repair the input.
+      if (!/^https?:\/\//i.test(value)) {
+        throw new Error('اكتب الرابط كاملًا، بما في ذلك https:// أو http://');
+      }
+
+      let url;
+
+      try {
+        url = new URL(value);
+      } catch {
+        throw new Error('صيغة الرابط غير صحيحة. راجع اسم النطاق والعنوان.');
+      }
+
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        throw new Error('البروتوكول غير مدعوم.');
+      }
+
+      if (!url.hostname || url.hostname.length > 253) {
+        throw new Error('اسم النطاق غير صالح.');
+      }
+
+      if (url.username || url.password) {
+        throw new Error('الرابط يحتوي على بيانات دخول مضمنة. لن نحلله بهذه الصيغة.');
+      }
+
+      if (url.hostname.endsWith('.')) {
+        throw new Error('أزل النقطة النهائية من اسم النطاق ثم حاول مجددًا.');
+      }
+
+      const host = url.hostname.toLowerCase();
+
+      if (host.startsWith('.') || host.includes('..')) {
+        throw new Error('اسم النطاق يحتوي على نقاط غير صالحة.');
+      }
+
+      if (!isIP(host) && !isValidDomain(host)) {
+        throw new Error('اسم النطاق غير صالح أو غير مكتمل.');
+      }
+
+      return { url, host, original: value };
+    }
+
+    function isIP(host) {
+      // WHATWG URL normalizes many IPv4 representations.
+      const parts = host.split('.');
+      if (
+        parts.length === 4 &&
+        parts.every(p => /^\d{1,3}$/.test(p) && Number(p) <= 255)
+      ) return true;
+
+      return host.startsWith('[') && host.endsWith(']');
+    }
+
+    function isValidDomain(host) {
+      if (host.length > 253 || !host.includes('.')) return false;
+
+      const labels = host.split('.');
+      return labels.every(label =>
+        label.length >= 1 &&
+        label.length <= 63 &&
+        /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label)
+      );
+    }
+
+    const shorteners = new Set([
+      'bit.ly', 't.co', 'tinyurl.com', 'is.gd',
+      'cutt.ly', 'shorturl.at', 'rebrand.ly',
+      'rb.gy', 'ow.ly', 'buff.ly', 'lnkd.in',
+      's.id', 'tiny.cc'
+    ]);
+
+    const suspiciousTerms = [
+      { re: /login|log-in|signin|sign-in/i, label: 'كلمات مرتبطة بتسجيل الدخول', detail: 'تظهر كلمات مرتبطة بتسجيل الدخول في عنوان الرابط.' },
+      { re: /verify|verification|confirm|validate/i, label: 'كلمات مرتبطة بالتحقق', detail: 'يحتوي العنوان على كلمات تطلب التحقق أو التأكيد.' },
+      { re: /password|passwd|credential/i, label: 'كلمات مرتبطة بكلمات المرور', detail: 'يحتوي العنوان على مصطلحات مرتبطة ببيانات الاعتماد.' },
+      { re: /wallet|seedphrase|private.?key|crypto/i, label: 'مصطلحات مالية حساسة', detail: 'يحتوي العنوان على مصطلحات قد ترتبط بمحافظ أو مفاتيح مالية.' },
+      { re: /urgent|suspended|unlock|account.?alert/i, label: 'لغة الاستعجال أو التهديد', detail: 'يحتوي العنوان على كلمات قد تُستخدم للضغط على المستخدم.' },
+      { re: /free.?gift|claim.?now|prize|giveaway/i, label: 'وعود بجوائز أو هدايا', detail: 'يحتوي العنوان على كلمات ترويجية قد تستعمل في عمليات الاحتيال.' }
+    ];
+
+    function analyze(parsed) {
+      const { url, host, original } = parsed;
+      const findings = [];
+      const seen = new Set();
+      let score = 0;
+
+      function add(points, level, title, detail) {
+        if (seen.has(title)) return;
+        seen.add(title);
+        score += points;
+        findings.push({ points, level, title, detail });
+      }
+
+      const hostnameLabels = host.split('.');
+      const isIpAddress = isIP(host);
+      const unicodeHost = /[^\x00-\x7F]/.test(host);
+
+      if (url.protocol === 'http:') {
+        add(18, 'warning', 'الاتصال يستخدم HTTP',
+          'الاتصال غير مشفر بواسطة HTTPS. هذا لا يثبت أن الموقع ضار، لكنه يقلل حماية الاتصال.');
+      }
+
+      if (isIpAddress) {
+        add(22, 'danger', 'استخدام عنوان IP مباشر',
+          'الرابط يستهدف عنوان IP بدل اسم نطاق تقليدي. بعض المواقع الشرعية تستخدم ذلك أيضًا.');
+      }
+
+      if (unicodeHost || host.startsWith('xn--') || hostnameLabels.some(label => label.startsWith('xn--'))) {
+        add(22, 'danger', 'اسم نطاق دولي أو مشفر',
+          'قد تظهر بعض النطاقات بحروف متشابهة بصريًا. يلزم التحقق من هوية النطاق، ولا يعني ذلك وحده وجود تصيد.');
+      }
+
+      if (original.includes('@')) {
+        add(24, 'danger', 'وجود رمز @ في العنوان',
+          'قد يُستخدم الرمز لتضليل قراءة عنوان URL. تحقق من اسم المضيف الذي يعرضه المتصفح.');
+      }
+
+      const hyphens = (host.match(/-/g) || []).length;
+      if (hyphens >= 3) {
+        add(10, 'warning', 'عدد مرتفع من الشرطات في النطاق',
+          'كثرة الشرطات قد تظهر في نطاقات مضللة، لكنها ليست دليلًا قاطعًا على الخطر.');
+      }
+
+      if (hostnameLabels.length >= 5) {
+        add(8, 'warning', 'نطاق يحتوي على مستويات فرعية كثيرة',
+          'تعدد مستويات النطاق قد يصعّب قراءة النطاق الفعلي.');
+      }
+
+      if (host.length >= 45) {
+        add(8, 'warning', 'اسم نطاق طويل',
+          'اسم النطاق أطول من المعتاد نسبيًا وقد يستحق التحقق من مصدره.');
+      }
+
+      if (shorteners.has(host)) {
+        add(16, 'warning', 'خدمة اختصار روابط',
+          'الرابط يستخدم خدمة اختصار. الوجهة النهائية غير معروفة لأن الأداة لا تتبع التحويلات.');
+      }
+
+      if (url.port && !['80', '443'].includes(url.port)) {
+        add(8, 'warning', 'منفذ غير شائع',
+          'الرابط يحدد منفذ اتصال غير شائع لتصفح الويب.');
+      }
+
+      if (original.length > 180) {
+        add(8, 'warning', 'رابط طويل جدًا',
+          'طول الرابط قد يجعل مراجعة مساره ومعاملاته أكثر صعوبة.');
+      }
+
+      const subdomainText = hostnameLabels.slice(0, -2).join('.');
+      if (/(?:paypal|microsoft|apple|google|amazon|facebook|instagram|whatsapp|bank)/i.test(subdomainText)) {
+        add(18, 'warning', 'اسم علامة تجارية في نطاق فرعي',
+          'ظهور اسم علامة تجارية داخل نطاق فرعي لا يثبت ملكية النطاق لهذه العلامة. تحقق من النطاق الأساسي.');
+      }
+
+      if (url.hostname.split('.').some(label => label.length > 35)) {
+        add(10, 'warning', 'مقطع طويل داخل اسم النطاق',
+          'يحتوي أحد أجزاء اسم النطاق على عدد كبير من المحارف.');
+      }
+
+      const decodedText = (url.pathname + url.search).slice(0, 3000);
+
+      for (const term of suspiciousTerms) {
+        if (term.re.test(decodedText)) {
+          add(7, 'warning', term.label, term.detail);
+        }
+      }
+
+      if (/%[0-9a-f]{2}/i.test(url.pathname + url.search)) {
+        add(4, 'info', 'وجود محارف مرمزة',
+          'يحتوي المسار أو الاستعلام على ترميز URL، وهو أمر طبيعي في كثير من الروابط.');
+      }
+
+      if (!findings.length) {
+        findings.push({
+          points: 0,
+          level: 'info',
+          title: 'لم تُرصد مؤشرات بنيوية واضحة',
+          detail: 'لم يجد التحليل المحلي أيًا من الأنماط المحددة في هذه النسخة. هذا لا يعني أن الموقع آمن.'
+        });
+      }
+
+      score = Math.min(100, score);
+
+      // A heuristic indicator, NOT a probability or a verdict from a threat database.
+      let category;
+
+      if (score >= 45) {
+        category = {
+          title: 'مؤشرات خطورة مرتفعة',
+          subtitle: 'تم رصد عدة مؤشرات تستدعي الحذر. لا تفتح الرابط قبل التحقق المستقل.',
+          color: '#ff707d',
+          css: 'bg-red-400/10 text-red-300',
+          icon: 'shield-alert'
+        };
+      } else if (score >= 18) {
+        category = {
+          title: 'يستحق المراجعة',
+          subtitle: 'تم رصد مؤشرات مريبة. تحقق من مصدر الرابط واسم النطاق.',
+          color: '#f5c46c',
+          css: 'bg-amber-300/10 text-amber-200',
+          icon: 'shield-question'
+        };
+      } else {
+        category = {
+          title: 'مؤشرات مرصودة محدودة',
+          subtitle: 'لم تظهر مؤشرات كثيرة وفق القواعد الحالية، لكن سلامة الرابط غير مؤكدة.',
+          color: '#70f0c0',
+          css: 'bg-emerald-300/10 text-emerald-200',
+          icon: 'shield-check'
+        };
+      }
+
+      return {
+        url: original,
+        host,
+        score,
+        category,
+        findings,
+        time: new Date().toLocaleString('ar-EG')
+      };
+    }
+
+    function renderReport(report) {
+      lastReport = report;
+
+      $('#resultTitle').textContent = report.category.title;
+      $('#resultSubtitle').textContent = report.category.subtitle;
+      $('#scoreValue').textContent = report.score;
+      $('#scoreRing').style.setProperty('--score', `${report.score * 3.6}deg`);
+      $('#scoreRing').style.setProperty('--ring-color', report.category.color);
+
+      const iconBox = $('#resultIconBox');
+      iconBox.className = 'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ' + report.category.css;
+
+      $('#resultIcon').setAttribute('data-lucide', report.category.icon);
+      $('#findingCount').textContent = `${report.findings.length} مؤشر`;
+
+      const list = $('#findingsList');
+      list.replaceChildren();
+
+      for (const finding of report.findings) {
+        const row = document.createElement('div');
+        row.className = 'result-row flex items-start gap-3 py-4';
+
+        const iconWrap = document.createElement('span');
+        iconWrap.className = 'w-8 h-8 rounded-lg shrink-0 flex items-center justify-center mt-0.5';
+
+        if (finding.level === 'danger') {
+          iconWrap.classList.add('bg-red-400/10', 'text-red-300');
+        } else if (finding.level === 'warning') {
+          iconWrap.classList.add('bg-amber-300/10', 'text-amber-200');
+        } else {
+          iconWrap.classList.add('bg-sky-300/10', 'text-sky-200');
+        }
+
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide',
+          finding.level === 'danger' ? 'alert-triangle' :
+          finding.level === 'warning' ? 'alert-circle' : 'info'
+        );
+        icon.className = 'w-4 h-4';
+        iconWrap.appendChild(icon);
+
+        const content = document.createElement('div');
+        content.className = 'min-w-0 flex-1';
+
+        const title = document.createElement('h4');
+        title.className = 'font-bold text-sm';
+        title.textContent = finding.title;
+
+        const detail = document.createElement('p');
+        detail.className = 'text-xs sm:text-sm text-slate-400 leading-7 mt-1';
+        detail.textContent = finding.detail;
+
+        content.append(title, detail);
+        row.append(iconWrap, content);
+        list.appendChild(row);
+      }
+
+      $('#resultDisclaimer').textContent =
+        'هذا المؤشر تقديري مبني على قواعد محلية ثابتة، وليس احتمالًا إحصائيًا للإصابة. ' +
+        'لم تُراجع قواعد بيانات التهديدات ولم يتم فتح الرابط. قد تكون النتيجة إيجابية أو سلبية كاذبة.';
+
+      results.classList.remove('hidden');
+      refreshIcons();
+    }
+
+    function setLoading(loading) {
+      scanBtn.disabled = loading;
+      scanLabel.textContent = loading ? 'جارٍ التحليل...' : 'حلّل الرابط';
+
+      scanIcon.classList.toggle('hidden', loading);
+
+      let spinner = scanBtn.querySelector('.spinner');
+
+      if (loading && !spinner) {
+        spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        spinner.setAttribute('aria-hidden', 'true');
+        scanBtn.prepend(spinner);
+      } else if (!loading && spinner) {
+        spinner.remove();
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      clearError();
+
+      let parsed;
+
+      try {
+        parsed = parseInput(input.value);
+      } catch (error) {
+        showError(error.message);
+        input.focus();
+        return;
+      }
+
+      setLoading(true);
+      results.classList.add('hidden');
+
+      // A small UI delay only. This is not a remote security scan.
+      setTimeout(() => {
+        try {
+          const report = analyze(parsed);
+          renderReport(report);
+          results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch {
+          showError('حدث خطأ أثناء التحليل. حاول مرة أخرى.');
+        } finally {
+          setLoading(false);
+        }
+      }, 350);
+    });
+
+    input.addEventListener('input', clearError);
+
+    document.querySelectorAll('[data-sample]').forEach(button => {
+      button.addEventListener('click', () => {
+        input.value = button.dataset.sample;
+        clearError();
+        input.focus();
+      });
+    });
+
+    $('#pasteBtn').addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          throw new Error('clipboard');
+        }
+
+        input.value = await navigator.clipboard.readText();
+        clearError();
+        input.focus();
+        showToast('تم لصق الرابط. راجعه قبل التحليل.');
+      } catch {
+        showToast('تعذر الوصول إلى الحافظة. الصق الرابط يدويًا.');
+        input.focus();
+      }
+    });
+
+    $('#clearBtn').addEventListener('click', () => {
+      input.value = '';
+      clearError();
+      results.classList.add('hidden');
+      lastReport = null;
+      input.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    $('#copyReportBtn').addEventListener('click', async () => {
+      if (!lastReport) return;
+
+      const text = [
+        '4T-LINK — تقرير التحليل المحلي',
+        `التاريخ: ${lastReport.time}`,
+        `الرابط: ${lastReport.url}`,
+        `النطاق: ${lastReport.host}`,
+        `مؤشر الخطورة: ${lastReport.score}/100`,
+        `التصنيف: ${lastReport.category.title}`,
+        '',
+        'المؤشرات:',
+        ...lastReport.findings.map((f, i) =>
+          `${i + 1}. ${f.title}\n   ${f.detail}`
+        ),
+        '',
+        'تنبيه: تحليل بنيوي محلي فقط، وليس فحصًا عبر قواعد بيانات التهديدات.',
+        'برمجة و تطوير عبدالفتاح عبدالحميد (ديبو)'
+      ].join('\n');
+
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+          throw new Error('clipboard');
+        }
+
+        await navigator.clipboard.writeText(text);
+        showToast('تم نسخ التقرير.');
+      } catch {
+        // Fallback for environments where Clipboard API is unavailable.
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.readOnly = true;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        let copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } catch {
+          copied = false;
+        }
+
+        textarea.remove();
+        showToast(copied ? 'تم نسخ التقرير.' : 'تعذر النسخ. حاول من متصفح حديث.');
+      }
+    });
+  </script>
+</body>
+</html>
